@@ -34,7 +34,50 @@ class FaceDetectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $folderpath = public_path()."\\img\\temp\\";
+        $threshold = 0.8;
+
+        $img = $request->image_tag;
+
+        $image_parts = explode(";base64,", $img);
+        $image_type_aux = explode("image/", $image_parts[0]);
+        $image_type = $image_type_aux[1];
+
+
+        $image_base64 = base64_decode($image_parts[1]);
+
+        $fileName = uniqid() . '.'.$image_type;
+  
+        $file = $folderpath . $fileName;
+        if(file_put_contents($file, $image_base64)){
+            $apicon = new \GuzzleHttp\Client([
+                'http_errors'=>false,
+                'base_uri'=>'http://192.168.2.130:8000'
+            ]);
+            
+            
+            $response = $apicon->request('POST', 'api/v1/verification/verify?face_plugins=landmarks,gender,age', [
+                'headers'=>[
+                    'x-api-key'=>'5b926d9f-0211-4f19-8819-ffe54a514a08'
+                ],
+                'multipart' => [
+                    [
+                        'name'     => 'source_image',
+                        'contents' => fopen( $file, 'r' ),
+                        'filename' => '1001.jpeg'
+                    ],
+                    [
+                        'name'     => 'target_image',
+                        'contents' => fopen( $file, 'r' ),
+                        'filename' => '1002.jpeg'
+                    ]
+                ],
+            ]);
+
+            $response = json_decode($response->getBody());
+
+            dd($response->result[0]->face_matches[0]->similarity);
+        }
     }
 
     /**

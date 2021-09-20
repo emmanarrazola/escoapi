@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
+
+use App\Http\Controllers\FaceDetectController;
+use App\Http\Controllers\FaceRegisterController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,5 +25,9 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+
+
+Route::resource('facedetection', FaceDetectController::class);
 
 require __DIR__.'/auth.php';

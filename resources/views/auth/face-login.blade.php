@@ -24,10 +24,8 @@
             </div>
         </div>
         <div class="row d-flex align-items-center justify-content-center">
-            <div class="col-lg-4 bg-secondary" style="height:300px">
-                <video autoplay="true" id="videoElement" class="mx-auto d-block">
-        
-                </video>
+            <div id="camera" class="col-lg-4 bg-secondary" style="height:300px">
+                
             </div>
         </div>
         <div class="row d-flex align-items-center justify-content-center">
@@ -39,7 +37,11 @@
                         <p class="card-text">Please allow to open your camera and click verify.</p>
                         <!-- <a href="#" class="card-link">Card link</a>
                         <a href="#" class="card-link">Another link</a> -->
-                        <button type="button" class="btn btn-primary w-100">Verify</button>
+                        <form id="captureimage" method="POST" action="{{ route('facedetection.store') }}">
+                            @csrf
+                            <input type="hidden" name="image_tag" id="image_tag" />
+                            <button type="submit" class="btn btn-primary w-100">Verify</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -48,17 +50,28 @@
 </body>
 <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
 <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
 <script type="text/javascript">
-    var video = document.querySelector("#videoElement");
+    $(function(){
+        Webcam.set({
+            height: 300,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
+    
+        Webcam.attach( '#camera' );
 
-        if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-            video.srcObject = stream;
-            })
-            .catch(function (err0r) {
-            console.log("Something went wrong!");
-            });
-        }
+        $("#captureimage").on('submit', function(e){
+            e.preventDefault();
+            var form = this;
+            Webcam.snap( function(data_uri) {
+                $("#image_tag").val(data_uri);
+
+                form.submit();
+                // document.getElementById('results').innerHTML = '<img src="'+data_uri+'"/>';
+            } );
+        })
+    });
 </script>
 </html>

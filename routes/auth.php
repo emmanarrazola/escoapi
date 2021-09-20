@@ -10,7 +10,6 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\FaceDetectController;
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
                 ->middleware('guest')
@@ -66,4 +65,3 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 
 
-Route::get('face-login', [FaceDetectController::class, 'index'])->name('face.login');
