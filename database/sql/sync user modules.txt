@@ -1,0 +1,14 @@
+INSERT INTO user_modules (module_id, user_id, selected)
+SELECT
+a.id,
+b.id,
+1 `selected`
+FROM
+modules a
+INNER JOIN users b ON 1=1 
+LEFT OUTER JOIN user_modules c ON
+	c.user_id = b.id AND
+    c.module_id = a.id 
+WHERE
+    a.id <> 1000 AND
+    c.id IS NULL

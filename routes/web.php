@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ScopeController;
+use App\Http\Controllers\ZohoApiController;
+use App\Http\Controllers\ZohoDeskDeptController;
+use App\Http\Controllers\ParametersController;
 
-use App\Http\Controllers\FaceDetectController;
-use App\Http\Controllers\FaceRegisterController;
 
 
 /*
@@ -19,15 +21,24 @@ use App\Http\Controllers\FaceRegisterController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+
+
+Route::group(['middleware'=>'auth'], function(){
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::resource('scopes', ScopeController::class);
+    Route::resource('zohoapi', ZohoApiController::class);
+    Route::resource('desk_departments', ZohoDeskDeptController::class);
+    Route::resource('parameters', ParametersController::class);
+
+});
 
 
 
-Route::resource('facedetection', FaceDetectController::class);
 
 require __DIR__.'/auth.php';

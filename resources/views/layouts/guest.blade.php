@@ -5,48 +5,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>ESCO Pte Ltd | API Portal</title>
 
-        <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+        <!-- ICON -->
+        <link rel="icon" href="{{asset('img/favicon.ico')}}" type="image/x-icon" />
+        <!-- Google Font: Source Sans Pro -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="{{asset('plugins/fontawesome-free/css/all.min.css')}}">
+        <!-- icheck bootstrap -->
+        <link rel="stylesheet" href="{{asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css')}}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{{asset('dist/css/adminlte.min.css')}}">
 
-        <!-- Styles -->
-        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-
-        <style type="text/css" media="screen">
-            html,
-            body {
-                height: 100%;
-            }
-
-            body {
-                display: flex;
-                align-items: center;
-            }
-
-            .form-signin {
-                width: 100%;
-                max-width: 450px;
-                margin: auto;
-            }
-            .form-signin .checkbox {
-                font-weight: 400;
-            }
-            .form-signin .form-control {
-                position: relative;
-                box-sizing: border-box;
-                height: auto;
-                font-size: 16px;
-            }
-            .form-signin .form-control:focus {
-                z-index: 2;
-            }
-        </style>
-
-        <!-- Scripts -->
-        <script src="{{ asset('js/app.js') }}" defer></script>
     </head>
-    <body class="border bg-success">
+    <body class="hold-transition login-page">
         {{ $slot }}
     </body>
 </html>
