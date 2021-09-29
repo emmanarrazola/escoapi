@@ -38,7 +38,7 @@ class ApiController extends Controller
             'a.cf_room_name as Room Name', 
             'c.accountName as Company Name',
             'a.closedTime as Closed Date',
-            'a.purpose as Purpose'
+            'a.cf_purpose as Purpose'
         );
         $tickets = $tickets->get();
 
