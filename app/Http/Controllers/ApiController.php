@@ -23,20 +23,20 @@ class ApiController extends Controller
         $tickets->leftJoin('zoho_desk_agent as d', 'a.agent_id', 'd.id');
         $tickets->select(
             'a.id as ID', 
-            'a.ticketNumber as `Ticket Number`',
-            'a.subject as `Subject`', 
-            'd.name as `Ticket Owner`',
-            'a.status as `Status`', 
-            'a.createdTime as `Created Tune`', 
-            'a.category as `Category`', 
-            'a.subcategory as `Sub Category`', 
-            'a.dueDate as `Due Date`', 
-            'a.cf_floor as `Floor`', 
-            'a.cf_service_coverage as `Service Coverage`', 
-            'a.cf_required_date as `Required Date`', 
-            'a.cf_requester as `Requester`', 
-            'a.cf_room_name as `Room Name`', 
-            'c.accountName as `Company Name`'
+            'a.ticketNumber as Ticket Number',
+            'a.subject as Subject', 
+            'd.name as Ticket Owner',
+            'a.status as Status', 
+            'a.createdTime as Created Tune', 
+            'a.category as Category', 
+            'a.subcategory as Sub Category', 
+            'a.dueDate as Due Date', 
+            'a.cf_floor as Floor', 
+            'a.cf_service_coverage as Service Coverage', 
+            'a.cf_required_date as Required Date', 
+            'a.cf_requester as Requester', 
+            'a.cf_room_name as Room Name', 
+            'c.accountName as Company Name'
         );
         $tickets = $tickets->get();
 
