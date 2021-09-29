@@ -27,7 +27,7 @@ class ApiController extends Controller
             'a.subject as Subject', 
             'd.name as Ticket Owner',
             'a.status as Status', 
-            'a.createdTime as Created Tune', 
+            'a.createdTime as Created Time', 
             'a.category as Category', 
             'a.subcategory as Sub Category', 
             'a.dueDate as Due Date', 
@@ -36,7 +36,9 @@ class ApiController extends Controller
             'a.cf_required_date as Required Date', 
             'a.cf_requester as Requester', 
             'a.cf_room_name as Room Name', 
-            'c.accountName as Company Name'
+            'c.accountName as Company Name',
+            'a.closedTime as Closed Date',
+            'a.purpose as Purpose'
         );
         $tickets = $tickets->get();
 

@@ -42,12 +42,14 @@ class ZohoDeskTicketController extends Controller
             $addtlparam['from'] = 1;
             
             $response = Main::getapidata(1005, $addtlparam);
+            
             while($response !== null){
                 if(!isset($response->error) && !isset($response->errorCode)){
                     foreach($response->data as $ticket){
                         $created_at = Carbon::parse($ticket->createdTime)->format('Y-m-d H:i:s');
                         $due_date = Carbon::parse($ticket->dueDate)->format('Y-m-d H:i:s');
                         $required_date = Carbon::parse($ticket->cf->cf_required_date)->format('Y-m-d H:i:s');
+                        $closed_date = Carbon::parse($ticket->closedTime)->format('Y-m-d H:i:s');
 
                         $data = [
                             'ticketNumber'=>$ticket->ticketNumber,
@@ -65,7 +67,9 @@ class ZohoDeskTicketController extends Controller
                             'cf_required_date'=>$required_date,
                             'cf_requester'=>$ticket->cf->cf_requester,
                             'cf_room_name'=>$ticket->cf->cf_room_name,
+                            'cf_purpose'=>$ticket->cf->cf_purpose,
                             'agent_id'=>$ticket->assignee->id,
+                            'closedTime'=>$closed_date,
                         ];
     
                         ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
