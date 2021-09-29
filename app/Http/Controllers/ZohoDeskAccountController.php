@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ZohoDeskDeptModel;
-use App\Models\ZohoApiModel;
-use App\Models\ParametersModel;
-use App\Models\ScopeModel;
+use App\Models\ZohoDeskAccountModel;
 use App\Models\SystemSetupModel;
-
-use App\Classes\Main;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class ZohoDeskDeptController extends Controller
+use App\Classes\Main;
+
+class ZohoDeskAccountController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,9 +19,9 @@ class ZohoDeskDeptController extends Controller
      */
     public function index()
     {
-        $depts = ZohoDeskDeptModel::where('id','<>', 1000)->get();
+        $accounts = ZohoDeskAccountModel::all();
 
-        return view('zohodesk-dept.zohodesk-dept-master', ['depts'=>$depts]);
+        return view('zohodesk-account.zohodesk-account-master', ['accounts'=>$accounts]);
     }
 
     /**
@@ -39,38 +36,35 @@ class ZohoDeskDeptController extends Controller
             $systemsetup = SystemSetupModel::first();
 
             $addtlparam['from'] = 1;
-
-            $response = Main::getapidata(1002, $addtlparam);
+            $response = Main::getapidata(1007, $addtlparam);
             
             while($response !== null){
                 if(!isset($response->error) && !isset($response->errorCode)){
-                    foreach($response->data as $dept){
-                        $created_at = Carbon::parse($dept->createdTime)->format('Y-m-d H:i:s');
+                    foreach($response->data as $account){
+                        $created_at = Carbon::parse($account->createdTime)->format('Y-m-d H:i:s');
                         $data = [
-                            'name'=>$dept->name,
-                            'description'=>$dept->description,
+                            'accountName'=>$account->accountName,
+                            'email'=>$account->email,
+                            'website'=>$account->website,
+                            'phone'=>$account->phone,
                             'createdTime'=>$created_at,
-                            'creatorId'=>$dept->creatorId,
-                            'hasLogo'=>($dept->hasLogo === true) ? 1 : 0,
-                            'chatStatus'=>$dept->chatStatus,
-                            'nameInCustomerPortal'=>$dept->nameInCustomerPortal,
-                            'isAssignToTeamEnabled'=>($dept->isAssignToTeamEnabled === true) ? 1 : 0,
-                            'isEnabled'=>($dept->isEnabled === true) ? 1 : 0,
-                            'isVisibleInCustomerPortal'=>($dept->isVisibleInCustomerPortal === true) ? 1 : 0,
-                            'sanitizedName'=>$dept->sanitizedName,
-                            'isDefault'=>($dept->isDefault === true) ? 1 : 0
+                            'webUrl'=>$account->webUrl,
+                            'badPercentage'=>$account->customerHappiness->badPercentage,
+                            'okPercentage'=>$account->customerHappiness->okPercentage,
+                            'goodPercentage'=>$account->customerHappiness->goodPercentage,
+                            'zohoCRMAccount'=>(isset($account->zohoCRMAccount->id)) ? $account->zohoCRMAccount->id : 1000,
                         ];
 
-                        ZohoDeskDeptModel::updateOrCreate(['id'=>$dept->id], $data);
+                        ZohoDeskAccountModel::updateOrCreate(['id'=>$account->id], $data);
                     }
+                    
                 }else{
-                    return redirect()->route('desk_departments.index')->with('warning', $response->message);
+                    return redirect()->route('desk_accounts.index')->with('warning', $response->message);
                 }
-
                 $addtlparam['from'] += $systemsetup->general_limit;
-                $response = Main::getapidata(1002, $addtlparam);
+                $response = Main::getapidata(1007, $addtlparam);
             }
-            return redirect()->route('desk_departments.index')->with('success', 'Desk Department Sync was Successful!');
+            return redirect()->route('desk_accounts.index')->with('success', 'Desk Accounts Sync was Successful!');
         }else{
             $query = Main::apiauthenticate();
 
@@ -120,11 +114,7 @@ class ZohoDeskDeptController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $apicon = new \GuzzleHttp\Client([
-            'http_errors' => false,
-        ]);
-
-        dd($apicon);
+        //
     }
 
     /**

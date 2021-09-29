@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\ModuleModel;
+use App\Models\SubModuleModel;
 
 use App\Classes\Main;
 
@@ -34,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
     {
         if (Schema::hasTable('modules')) {
             
+            //
             view()->composer('*', function ($view) {
                 $userid = (isset(Auth::user()->id)) ? Auth::user()->id : false;
                 $usermodules = (new Main)->getmodules($userid, 1001);
@@ -42,12 +44,15 @@ class AppServiceProvider extends ServiceProvider
                     foreach($usermodules as $module){
                         if($module->route == Route::getCurrentRoute()->getName()){
                             $title = $module->description;
+                            $activemodule = $module->id;
                         }
                     }
+
                     if(!isset($title)){
                         $modulenew = ModuleModel::where('controllers', Request::segment(1))->first();
                         if(isset($modulenew)){
                             $title = ($modulenew->description) ? $modulenew->description : "Run Migration"; 
+                            $activemodule = $modulenew->id;
                         }
                     }
                     
@@ -59,24 +64,27 @@ class AppServiceProvider extends ServiceProvider
                     foreach($usersubmodules as $submodule){
                         if($submodule->route == Route::getCurrentRoute()->getName()){
                             $title = $submodule->description;
+                            $activemodule = $submodule->module_id;
                         }
                     }
 
                     if(!isset($title)){
-                        $modulenew = ModuleModel::where('controllers', Request::segment(1))->first();
-                        if(isset($modulenew)){
-                            $title = ($modulenew->description) ? $modulenew->description : "Run Migration"; 
+                        $submodulenew = SubModuleModel::where('controllers', Request::segment(1))->first();
+                        if(isset($submodulenew)){
+                            $title = ($submodulenew->description) ? $submodulenew->description : "Run Migration";
+                            $activemodule = $submodule->module_id;
                         }
                     }
-                    
                 }else{
                     $title = "Run Migration";
                 }
 
+
                 view()->share([
                     'usermodules'=>$usermodules,
                     'usersubmodules'=>$usersubmodules,
-                    'title'=>(isset($title)) ? $title : "Run Migration"
+                    'title'=>(isset($title)) ? $title : "Run Migration",
+                    'activemodule'=>(isset($activemodule)) ? $activemodule : 1000,
                 ]);
             });
 

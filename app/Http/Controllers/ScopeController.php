@@ -41,7 +41,7 @@ class ScopeController extends Controller
         $scope = ScopeModel::create([
             'description'=>$request->description,
             'zoho_scope'=>$request->zoho_scope,
-            'isactive'=>$request->isactive
+            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
         ]);
 
         return redirect()->route('scopes.index')->with('success', 'Record has been created!');
@@ -83,7 +83,7 @@ class ScopeController extends Controller
         $scope = ScopeModel::where('id', $id)->update([
             'description'=>$request->description,
             'zoho_scope'=>$request->zoho_scope,
-            'isactive'=>$request->isactive
+            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
         ]);
 
         return redirect()->route('scopes.index')->with('success', 'Record has been updated!');

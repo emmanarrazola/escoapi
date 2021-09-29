@@ -12,9 +12,9 @@
 	<!-- Main content -->
 	<section class="content">
 		<!-- Default box -->
-		<form class="form-horizontal" method="post" action="{{route('scopes.store')}}" enctype="multipart/form-data">
+		<form class="form-horizontal" method="post" action="{{route('zohoapi.update', ['zohoapi'=>$zohoapi->id])}}" enctype="multipart/form-data">
 			@csrf
-
+			@method('PUT')
 			<div class="card">
 				<div class="card-header">
 					<h3 class="card-title">Masterlist</h3>
@@ -31,24 +31,24 @@
 					<div class="form-group row">
 						<label for="description" class="col-sm-2 col-form-label">Description</label>
 						<div class="col-sm-10">
-							<input type="text" required name="description" value="{{old('description')}}" class="form-control form-control-sm" id="description" placeholder="Description">
+							<input type="text" required name="description" value="{{old('description', $zohoapi->description)}}" class="form-control form-control-sm" id="description" placeholder="Description">
 						</div>
 					</div>
 					<div class="form-group row">
-						<label for="zoho_scope" class="col-sm-2 col-form-label">Zoho Scope</label>
+						<label for="url" class="col-sm-2 col-form-label">URL</label>
 						<div class="col-sm-10">
-							<input type="text" required name="zoho_scope" value="{{old('zoho_scope')}}" class="form-control form-control-sm"" id="zoho_scope" placeholder="Zoho Scope">
+							<input type="text" name="url" value="{{old('url', $zohoapi->url)}}" class="form-control form-control-sm"" id="url" placeholder="URL">
 						</div>
 					</div>
 					<div class="form-group row">
 						<label for="isactive" class="col-sm-2 col-form-label">Active?</label>
 						
 						<div class="custom-control custom-switch col-sm-10">
-							@if(old('isactive', 1) == 1)
+							@if(old('isactive', $zohoapi->isactive) == 1)
 								<input type="checkbox" name="isactive" value="1" checked class="custom-control-input" id="active">
 								<label class="custom-control-label ml-2 mt-1" for="active"></label>
 							@else
-								<input type="checkbox" name="isactive" value="1" class="custom-control-input" id="active">
+								<input type="checkbox" name="isactive" value="0" class="custom-control-input" id="active">
 								<label class="custom-control-label ml-2 mt-1" for="active"></label>
 							@endif
 						</div>
@@ -56,8 +56,8 @@
 				</div>
 				<!-- /.card-body -->
 				<div class="card-footer">
-					<button type="submit" class="btn btn-outline-success float-right ml-2">Create</button>
-					<a href="{{route('scopes.index')}}"><button type="button" class="btn btn-outline-secondary float-right">Cancel</button></a>
+					<button type="submit" class="btn btn-outline-success float-right ml-2">Update</button>
+					<a href="{{route('zohoapi.index')}}"><button type="button" class="btn btn-outline-secondary float-right">Cancel</button></a>
 				</div>
 				<!-- /.card-footer-->
 			</div>

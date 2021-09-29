@@ -35,9 +35,14 @@
                 <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
                 @if($usermodules->count() > 0)
                     @foreach($usermodules as $module)
+                        @php 
+                            $active = ($activemodule == $module->module_id) ? "active" : "";
+                            $open = ($activemodule == $module->module_id) ? "menu-open" : "";
+                        @endphp
+
                         @if($module->sub_module_count == 0)
                             <li class="nav-item">
-                                <a href="{{route($module->route)}}" class="nav-link">
+                                <a href="{{route($module->route)}}" class="nav-link {{$active}}">
                                     <i class="nav-icon {{$module->icon}}"></i>
                                     <p>
                                         {{$module->description}}
@@ -45,8 +50,8 @@
                                 </a>
                             </li>
                         @else
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
+                            <li class="nav-item {{$open}}">
+                                <a href="#" class="nav-link {{$active}}">
                                     <i class="nav-icon {{$module->icon}}"></i>
                                     <p>
                                     {{$module->description}}
@@ -54,18 +59,27 @@
                                     </p>
                                 </a>
                                 <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        @if($usersubmodules->count() > 0)
-                                            @foreach($usersubmodules as $submodule)
-                                                @if($submodule->module_id == $module->module_id)
-                                                <a href="{{route($submodule->route)}}" class="nav-link">
-                                                    <i class="far fa-circle nav-icon"></i>
-                                                    <p>{{$submodule->description}}</p>
-                                                </a>
+                                    @if($usersubmodules->count() > 0)
+                                        @foreach($usersubmodules as $submodule)
+                                            @if($submodule->module_id == $module->module_id)
+                                                @if(request()->routeIs($submodule->controllers.'.*'))
+                                                <li class="nav-item">
+                                                    <a href="{{route($submodule->route)}}" class="nav-link active">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        <p>{{$submodule->description}}</p>
+                                                    </a>
+                                                </li>
+                                                @else
+                                                <li>
+                                                    <a href="{{route($submodule->route)}}" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        <p>{{$submodule->description}}</p>
+                                                    </a>
+                                                </li>
                                                 @endif
-                                            @endforeach
-                                        @endif
-                                    </li>
+                                            @endif
+                                        @endforeach
+                                    @endif
                                 </ul>
                             </li>
                         @endif

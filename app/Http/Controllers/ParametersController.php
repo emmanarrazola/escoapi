@@ -51,7 +51,7 @@ class ParametersController extends Controller
             'params_type_id'=>$request->paramstype,
             'params_key'=>$request->key,
             'params_value'=>$request->value,
-            'isactive'=>$request->isactive,
+            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
         ]);
 
         return redirect()->route('parameters.index')->with('success', 'Record has been created!');
@@ -97,7 +97,7 @@ class ParametersController extends Controller
             'params_type_id'=>$request->paramstype,
             'params_key'=>$request->key,
             'params_value'=>$request->value,
-            'isactive'=>$request->isactive,
+            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
         ]);
 
         return redirect()->route('parameters.index')->with('success', 'Record has been updated!');

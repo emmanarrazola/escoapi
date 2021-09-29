@@ -4,20 +4,39 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\ZohoApiModel;
+use App\Models\SystemSetupModel;
 
-class ZohoApiController extends Controller
+use App\Classes\Main;
+
+use Carbon\Carbon;
+
+class ApiAuthController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $zohoapis = ZohoApiModel::where('isdelete', 0)->where('id', '<>', 1000)->get();
+        if($request->code !== null){
+            $code = $request->code;
+            $response = Main::getapicode($code);            
 
-        return view('zohoapi.zohoapi-master', ['zohoapis'=>$zohoapis]);
+            if(!isset($response->error)){
+                SystemSetupModel::first()->update([
+                    'access_token'=>$response->access_token,
+                    'refresh_token'=>$response->refresh_token,
+                    'expires_in'=>Carbon::now()->addSeconds($response->expires_in)
+                ]);
+            }else{
+                SystemSetupModel::first()->update(['code'=>$code]);
+            }
+            
+            return redirect()->route('desk_departments.create');
+        }else{
+            abort(404);
+        }
     }
 
     /**
@@ -27,7 +46,7 @@ class ZohoApiController extends Controller
      */
     public function create()
     {
-        return view('zohoapi.zohoapi-new');
+        //
     }
 
     /**
@@ -38,13 +57,7 @@ class ZohoApiController extends Controller
      */
     public function store(Request $request)
     {
-        $zohoapi = ZohoApiModel::create([
-            'description'=>$request->description,
-            'url'=>$request->url,
-            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
-        ]);
-
-        return redirect()->route('zohoapi.index')->with('success', 'Record has been created!');
+        //
     }
 
     /**
@@ -55,7 +68,7 @@ class ZohoApiController extends Controller
      */
     public function show($id)
     {
-        //
+        abort(404);
     }
 
     /**
@@ -66,9 +79,7 @@ class ZohoApiController extends Controller
      */
     public function edit($id)
     {
-        $zohoapi = ZohoApiModel::where('id', $id)->firstOrFail();
-
-        return view('zohoapi.zohoapi-edit', ['zohoapi'=>$zohoapi]);
+        //
     }
 
     /**
@@ -80,13 +91,7 @@ class ZohoApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $zohoapi = ZohoApiModel::where('id', $id)->update([
-            'description'=>$request->description,
-            'url'=>$request->url,
-            'isactive'=>(isset($request->isactive)) ? $request->isactive : 0,
-        ]);
-
-        return redirect()->route('zohoapi.index')->with('success', 'Record has been updated!');
+        //
     }
 
     /**

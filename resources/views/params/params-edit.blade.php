@@ -41,7 +41,7 @@
 										@if($api->id == old('apiname', $param->zoho_api_id))
 											<option selected value="{{$api->id}}">{{$api->description}}</option>
 										@else
-											<option>{{$api->description}}</option>
+											<option value="{{$api->id}}">{{$api->description}}</option>
 										@endif
 									@endforeach
 								@endif
@@ -56,9 +56,9 @@
 								@if($paramstype->count() > 0)
 									@foreach($paramstype as $type)
 										@if($type->id == old('paramstype', $param->params_type_id))
-											<option selected value="{{$api->id}}">{{$type->description}}</option>
+											<option selected value="{{$type->id}}">{{$type->description}}</option>
 										@else
-											<option>{{$type->description}}</option>
+											<option value="{{$type->id}}">{{$type->description}}</option>
 										@endif
 									@endforeach
 								@endif
@@ -84,7 +84,7 @@
 								<input type="checkbox" name="isactive" value="1" checked class="custom-control-input" id="active">
 								<label class="custom-control-label ml-2 mt-1" for="active"></label>
 							@else
-								<input type="checkbox" name="isactive" value="0" class="custom-control-input" id="active">
+								<input type="checkbox" name="isactive" value="1" class="custom-control-input" id="active">
 								<label class="custom-control-label ml-2 mt-1" for="active"></label>
 							@endif
 						</div>

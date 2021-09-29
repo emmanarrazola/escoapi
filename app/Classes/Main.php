@@ -5,6 +5,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\UserModuleModel;
 use App\Models\UserSubModuleModel;
+use App\Models\ZohoApiModel;
+use App\Models\ParametersModel;
+use App\Models\ScopeModel;
+use App\Models\SystemSetupModel;
+use App\Models\ZohoDeskAgentDeptModel;
+use App\Models\ZohoDeskAgentModel;
+
+use Carbon\Carbon;
 
 class Main {
     public function getmodules($user_id, $module_display){
@@ -48,5 +56,290 @@ class Main {
         $usersubmodules = $usersubmodules->orderBy('b.sorter');
 
         return $usersubmodules->get();
+    }
+    public static function apiauthenticate(){
+        $apis = ZohoApiModel::from('zoho_api as a')
+                    ->join('api_methods as b', 'a.api_method_id', 'b.id')
+                    ->where('a.isauth', 1)
+                    ->select('a.*', 'b.method')
+                    ->firstOrFail();
+        $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+        $scopes = ScopeModel::where('isactive', 1)->where('isdelete', 0)->where('id', '<>', 1000)->get();
+        $systemsetup = SystemSetupModel::first()->toArray();
+        $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
+        $zoho_scope = "";
+
+       
+        if($params->count() > 0){
+            foreach($params as $param){
+                if($param->params_type_id == 1004){
+                    if($param->id !== $params->last()->id){
+                        $query .= $param->params_key."=".$param->params_value."&";
+                    }else{
+                        $query .= $param->params_key."=".$param->params_value;
+                    }
+                }
+            }
+        }
+
+        if($scopes->count() > 0){
+            foreach($scopes as $scope){
+                if($scope->id !== $scopes->last()->id){
+                    $zoho_scope .= $scope->zoho_scope.","; 
+                }else{
+                    $zoho_scope .= $scope->zoho_scope; 
+                }
+            }
+        }
+
+        if($systemsetup !== null){
+           foreach($systemsetup as $setup => $key){
+               $query = str_replace("@".$setup, $key, $query);
+           }
+        }
+
+        $query = str_replace("@scopes", $zoho_scope, $query);
+
+        return $query;
+    }
+    public static function getapicode($code){
+        $apis = ZohoApiModel::from('zoho_api as a')
+                    ->join('api_methods as b', 'a.api_method_id', 'b.id')
+                    ->where('a.iscode', 1)
+                    ->select('a.*', 'b.method')
+                    ->firstOrFail();
+        $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+        $systemsetup = SystemSetupModel::first()->toArray();
+        $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
+
+        if($params->count() > 0){
+            foreach($params as $param){
+                if($param->params_type_id == 1004){
+                    if($param->id !== $params->last()->id){
+                        $query .= $param->params_key."=".$param->params_value."&";
+                    }else{
+                        $query .= $param->params_key."=".$param->params_value;
+                    }
+                }
+            }
+        }
+        
+        $query = str_replace("@code", $code, $query);
+
+        if($systemsetup !== null){
+            foreach($systemsetup as $setup => $key){
+                echo $setup."-".$key."<br />";
+                $query = str_replace("@".$setup, $key, $query);
+                
+            }  
+        }
+        
+        $apicon = new \GuzzleHttp\Client([
+            'http_errors' => false,
+        ]);
+
+        $response = $apicon->request($apis->method, $query, [
+            'verify'=>false
+        ]);
+
+        $response = json_decode($response->getBody());
+        
+        return $response;
+    }
+    public static function validate_token(){
+        $systemsetup = SystemSetupModel::firstOrFail();
+
+        if(Carbon::now()->lt($systemsetup->expires_in) !== false){
+            $apis = ZohoApiModel::from('zoho_api as a')
+                    ->join('api_methods as b', 'a.api_method_id', 'b.id')
+                    ->where('a.isrefresh', 1)
+                    ->select('a.*', 'b.method')
+                    ->firstOrFail();
+            $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+            $scopes = ScopeModel::where('isactive', 1)->where('isdelete', 0)->where('id', '<>', 1000)->get();
+            $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
+            $systemsetup = $systemsetup->toArray();
+            $zoho_scope = "";
+
+            if($params->count() > 0){
+                foreach($params as $param){
+                    if($param->params_type_id == 1004){
+                        if($param->id !== $params->last()->id){
+                            $query .= $param->params_key."=".$param->params_value."&";
+                        }else{
+                            $query .= $param->params_key."=".$param->params_value;
+                        }
+                    }
+                }
+            }
+
+            if($scopes->count() > 0){
+                foreach($scopes as $scope){
+                    if($scope->id !== $scopes->last()->id){
+                        $zoho_scope .= $scope->zoho_scope.","; 
+                    }else{
+                        $zoho_scope .= $scope->zoho_scope; 
+                    }
+                }
+            }
+    
+            if($systemsetup !== null){
+                foreach($systemsetup as $setup => $key){
+                    $query = str_replace("@".$setup, $key, $query);
+                }
+            }
+
+            $query = str_replace("@scopes", $zoho_scope, $query);
+
+            $apicon = new \GuzzleHttp\Client([
+                'http_errors' => false,
+            ]);
+    
+            $response = $apicon->request($apis->method, $query, [
+                'verify'=>false
+            ]);
+    
+            $response = json_decode($response->getBody());
+
+            
+            if(!isset($reponse->error)){
+                SystemSetupModel::first()->update([
+                    'access_token'=>$response->access_token,
+                    'expires_in'=>Carbon::now()->addSeconds($response->expires_in)
+                ]);
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    public static function getapidata($apicode, $addtlparam = null){
+        $apis = ZohoApiModel::from('zoho_api as a')
+                    ->join('api_methods as b', 'a.api_method_id', 'b.id')
+                    ->where('a.id', $apicode)
+                    ->select('a.*', 'b.method')
+                    ->firstOrFail();
+        $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+        $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
+        $systemsetup = SystemSetupModel::first()->toArray();
+        $query_params = 0;
+        if($params->count() > 0){
+            foreach($params as $param){
+                if($param->params_type_id == 1004){
+                    $query_params = 1;
+                    if($param->id !== $params->last()->id){
+                        $query .= $param->params_key."=".$param->params_value."&";
+                    }else{
+                        $query .= $param->params_key."=".$param->params_value;
+                    }
+                }elseif($param->params_type_id == 1002){
+                    if($systemsetup !== null){
+                        $param_value = $param->params_value;
+                        foreach($systemsetup as $setup => $key){
+                            $param_value = str_replace("@".$setup, $key, $param_value);
+                        }
+                        $headers[$param->params_key] = $param_value;
+                    }
+                }
+            }
+
+            if($addtlparam !== null){
+                $query = ($query_params == 1) ? $query."&" : $query;
+                foreach($addtlparam as $param => $key){
+                    if(collect($addtlparam)->last() !== $key){
+                        $query .= $param."=".$key."&";
+                    }else{
+                        $query .= $param."=".$key;
+                    }
+                }
+            }
+
+            if($systemsetup !== null){
+                foreach($systemsetup as $setup => $key){
+                    $query = str_replace("@".$setup, $key, $query);
+                }
+            }
+
+            $apicon = new \GuzzleHttp\Client([
+                'headers'=>$headers,
+                'http_errors' => false,
+            ]);
+    
+            $response = $apicon->request($apis->method, $query, [
+                'verify'=>false
+            ]);
+    
+            $response = json_decode($response->getBody());
+
+            return $response;
+        }
+    }
+    public static function syncagentdept($agent_id){
+        $sql = "
+        INSERT INTO zoho_desk_agent_dept (desk_agent_id, desk_dept_id, selected)
+        SELECT
+        a.id `desk_agent_id`,
+        b.id `desk_dept_id`,
+        0 `selected`
+        FROM zoho_desk_agent a
+        INNER JOIN zoho_desk_dept b ON 1=1
+        LEFT OUTER JOIN zoho_desk_agent_dept c ON
+            c.desk_agent_id = a.id AND
+            c.desk_dept_id = b.id
+        WHERE
+            c.id IS NULL AND
+            a.id <> 1000 AND
+            b.id <> 1000 AND
+            a.id = ?
+        ";
+
+        DB::select($sql, [$agent_id]);
+
+        return true;
+    }
+    public static function syncagents($response){
+        if(!isset($response->error) && !isset($response->errorCode) && $response !== null){
+            foreach($response->data as $agent){
+                $data = [
+                    'name'=>$agent->name,
+                    'emailId'=>$agent->emailId,
+                    'isConfirmed'=>($agent->isConfirmed === true) ? 1 : 0,
+                    'status'=>($agent->status === 'ACTIVE') ? 1 : 0,
+                    'roleId'=>($agent->roleId === null) ? 1000 : $agent->roleId,
+                    'profileId'=>($agent->profileId === null) ? 1000 : $agent->profileId,
+                    'firstName'=>$agent->firstName,
+                    'lastName'=>$agent->lastName,
+                    'phone'=>$agent->phone,
+                    'mobile'=>$agent->mobile,
+                    'aboutInfo'=>$agent->aboutInfo,
+                    'extn'=>$agent->extn,
+                    'countryCode'=>$agent->countryCode,
+                    'rolePermissionType'=>$agent->rolePermissionType,
+                    'photoURL'=>$agent->photoURL,
+                    'timeZone'=>$agent->timeZone,
+                    'langCode'=>$agent->langCode,
+                ];
+
+                ZohoDeskAgentModel::updateOrCreate(['id'=>$agent->id], $data);
+                Main::syncagentdept($agent->id);
+
+                if(isset($agent->associatedDepartmentIds) && count($agent->associatedDepartmentIds) > 0){
+                    ZohoDeskAgentDeptModel::where('desk_agent_id', $agent->id)->update(['selected'=>0]);
+
+                    ZohoDeskAgentDeptModel::where('desk_agent_id', $agent->id)
+                        ->whereIn('desk_dept_id', $agent->associatedDepartmentIds)
+                        ->update([
+                            'selected'=>'1'
+                        ]);
+                }else{
+                    ZohoDeskAgentDeptModel::where('desk_agent_id', $agent->id)->update(['selected'=>0]);
+                }
+            }
+            return true;
+        }else{
+            return false;
+        }
     }
 }

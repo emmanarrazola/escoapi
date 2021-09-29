@@ -5,7 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ScopeController;
 use App\Http\Controllers\ZohoApiController;
 use App\Http\Controllers\ZohoDeskDeptController;
+use App\Http\Controllers\ZohoDeskAgentController;
+use App\Http\Controllers\ZohoDeskTicketController;
+use App\Http\Controllers\ZohoDeskAccountController;
 use App\Http\Controllers\ParametersController;
+use App\Http\Controllers\ApiAuthController;
+use App\Http\Controllers\ApiController;
 
 
 
@@ -34,10 +39,15 @@ Route::group(['middleware'=>'auth'], function(){
     Route::resource('scopes', ScopeController::class);
     Route::resource('zohoapi', ZohoApiController::class);
     Route::resource('desk_departments', ZohoDeskDeptController::class);
+    Route::resource('desk_agents', ZohoDeskAgentController::class);
     Route::resource('parameters', ParametersController::class);
+    Route::resource('desk_tickets', ZohoDeskTicketController::class);
+    Route::resource('desk_accounts', ZohoDeskAccountController::class);
 
+    Route::get('/apiauth', [ApiAuthController::class, 'index'])->name('apiauth');
 });
 
+Route::get('/get_zoho_tickets', [ApiController::class, 'get_zoho_tickets'])->name('get_zoho_tickets');
 
 
 

@@ -29,32 +29,29 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<table id="deptstbl" class="table table-sm table-bordered table-striped" style="width:100%">
+				<table id="ticketstbl" class="table table-sm table-bordered table-striped" style="width:100%">
 					<thead>
 						<tr>
-							<th>ID</th>
-							<th>Name</th>
-							<th>Description</th>
-							<th>Active</th>
+							<th>Ticket ID</th>
+							<th>Category</th>
+							<th>Subject</th>
+							<th>Status</th>
+							<th>Company Name</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@if($depts->count() > 0)
-							@foreach($depts as $dept)
+						@if($tickets->count() > 0)
+							@foreach($tickets as $ticket)
 								<tr>
-									<td class="align-middle">{{$dept->id}}</td>
-									<td class="align-middle">{{$dept->name}}</td>
-									<td class="align-middle">{{$dept->description}}</td>
-									@if($dept->isEnabled == 1)
-									<td class="align-middle text-center"><span class="badge badge-success" style="width:50px">YES</span></td>
-									@else
-									<td class="align-middle text-center"><span class="badge badge-danger" style="width:50px">NO</span></td>
-									@endif
+									<td class="align-middle">{{$ticket->ticketNumber}}</td>
+									<td class="align-middle">{{$ticket->category}}</td>
+									<td class="align-middle"><div style="text-overflow:ellipsis; width:350px">{{$ticket->subject}}</div></td>
+									<td class="align-middle text-center"><span class="badge badge-{{$ticket->color_class}}">{{$ticket->status}}</span></td>
+									<td class="align-middle text-center">{{$ticket->accountName}}</td>
 									<td class="align-middle">
-										<div class="text-center"> 
-											<a href="{{route('desk_departments.edit', ['desk_department'=>$dept->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">Edit</button></a>
-											<button type="button" class="btn btn-outline-danger btn-sm text-sm" style="width:60px">Delete</button>
+										<div class="d-inline-flex"> 
+											<a href="{{route('desk_tickets.edit', ['desk_ticket'=>$ticket->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">View</button></a>
 										</div>
 									</td>
 								</tr>
@@ -65,7 +62,7 @@
 			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
-				<a href="{{route('desk_departments.create')}}" class="btn btn-outline-success float-right">Sync</a>
+				<a href="{{route('desk_tickets.create')}}" class="btn btn-outline-success float-right">Sync</a>
 			</div>
 			<!-- /.card-footer-->
 		</div>
@@ -116,7 +113,7 @@
 			});
 		@endif
 
-		$("#deptstbl").DataTable({
+		$("#ticketstbl").DataTable({
 			'responsive':true
 		});
 	})

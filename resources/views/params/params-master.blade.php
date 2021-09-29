@@ -49,7 +49,7 @@
 									<td class="align-middle">{{$param->api_name}}</td>
 									<td class="align-middle">{{$param->params_type}}</td>
 									<td class="align-middle">{{$param->params_key}}</td>
-									<td class="align-middle">{{$param->params_value}}</td>
+									<td class="align-middle"><div style="width:200px;text-overflow:ellipsis">{{$param->params_value}}</div></td>
 									@if($param->isactive == 1)
 									<td class="align-middle text-center"><span class="badge badge-success" style="width:50px">YES</span></td>
 									@else
@@ -116,7 +116,11 @@
 		@endif
 
 		$("#paramstbl").DataTable({
-			'responsive':true
+			'responsive':true,
+			'order':[[0, 'desc']],
+			'columnDefs': [
+				{ width: '200px', targets: 4 }
+			],
 		});
 	})
 </script>

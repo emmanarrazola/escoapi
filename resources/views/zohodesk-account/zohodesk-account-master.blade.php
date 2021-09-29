@@ -29,31 +29,27 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<table id="deptstbl" class="table table-sm table-bordered table-striped" style="width:100%">
+				<table id="accountstbl" class="table table-sm table-bordered table-striped" style="width:100%">
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>Name</th>
-							<th>Description</th>
-							<th>Active</th>
+							<th>Account Name</th>
+							<th>Email</th>
+							<th>Website</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@if($depts->count() > 0)
-							@foreach($depts as $dept)
+						@if($accounts->count() > 0)
+							@foreach($accounts as $account)
 								<tr>
-									<td class="align-middle">{{$dept->id}}</td>
-									<td class="align-middle">{{$dept->name}}</td>
-									<td class="align-middle">{{$dept->description}}</td>
-									@if($dept->isEnabled == 1)
-									<td class="align-middle text-center"><span class="badge badge-success" style="width:50px">YES</span></td>
-									@else
-									<td class="align-middle text-center"><span class="badge badge-danger" style="width:50px">NO</span></td>
-									@endif
+									<td class="align-middle">{{$account->id}}</td>
+									<td class="align-middle">{{$account->accountName}}</td>
+									<td class="align-middle">{{$account->email}}</td>
+									<td class="align-middle">{{$account->website}}</td>
 									<td class="align-middle">
 										<div class="text-center"> 
-											<a href="{{route('desk_departments.edit', ['desk_department'=>$dept->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">Edit</button></a>
+											<a href="{{route('desk_accounts.edit', ['desk_account'=>$account->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">Edit</button></a>
 											<button type="button" class="btn btn-outline-danger btn-sm text-sm" style="width:60px">Delete</button>
 										</div>
 									</td>
@@ -65,7 +61,7 @@
 			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
-				<a href="{{route('desk_departments.create')}}" class="btn btn-outline-success float-right">Sync</a>
+				<a href="{{route('desk_accounts.create')}}" class="btn btn-outline-success float-right">Sync</a>
 			</div>
 			<!-- /.card-footer-->
 		</div>
@@ -116,7 +112,7 @@
 			});
 		@endif
 
-		$("#deptstbl").DataTable({
+		$("#accountstbl").DataTable({
 			'responsive':true
 		});
 	})
