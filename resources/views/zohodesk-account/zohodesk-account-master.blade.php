@@ -44,13 +44,12 @@
 							@foreach($accounts as $account)
 								<tr>
 									<td class="align-middle">{{$account->id}}</td>
-									<td class="align-middle">{{$account->accountName}}</td>
+									<td class="align-middle"><div style="width:200px;text-overflow:ellipsis">{{$account->accountName}}</div></td>
 									<td class="align-middle">{{$account->email}}</td>
-									<td class="align-middle">{{$account->website}}</td>
+									<td class="align-middle"><div style="width:200px;text-overflow:ellipsis">{{$account->website}}</div></td>
 									<td class="align-middle">
 										<div class="text-center"> 
-											<a href="{{route('desk_accounts.edit', ['desk_account'=>$account->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">Edit</button></a>
-											<button type="button" class="btn btn-outline-danger btn-sm text-sm" style="width:60px">Delete</button>
+											<a href="{{route('desk_accounts.edit', ['desk_account'=>$account->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">View</button></a>
 										</div>
 									</td>
 								</tr>
