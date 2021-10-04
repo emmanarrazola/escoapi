@@ -34,7 +34,7 @@ class ZohoDeskDeptController extends Controller
      */
     public function create()
     {
-        $validate_token = Main::validate_token();
+        $validate_token = Main::validate_token(1001);
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
 
@@ -72,7 +72,7 @@ class ZohoDeskDeptController extends Controller
             }
             return redirect()->route('desk_departments.index')->with('success', 'Desk Department Sync was Successful!');
         }else{
-            $query = Main::apiauthenticate();
+            $query = Main::apiauthenticate(1001);
 
             return redirect($query);
         }

@@ -11,6 +11,7 @@ use App\Models\ScopeModel;
 use App\Models\SystemSetupModel;
 use App\Models\ZohoDeskAgentDeptModel;
 use App\Models\ZohoDeskAgentModel;
+use App\Models\ZohoAuthModel;
 
 use Carbon\Carbon;
 
@@ -57,15 +58,21 @@ class Main {
 
         return $usersubmodules->get();
     }
-    public static function apiauthenticate(){
+    public static function apiauthenticate($zoho_auth){
         $apis = ZohoApiModel::from('zoho_api as a')
                     ->join('api_methods as b', 'a.api_method_id', 'b.id')
                     ->where('a.isauth', 1)
+                    ->where('a.zoho_auth_id', $zoho_auth)
                     ->select('a.*', 'b.method')
                     ->firstOrFail();
         $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
-        $scopes = ScopeModel::where('isactive', 1)->where('isdelete', 0)->where('id', '<>', 1000)->get();
+        $scopes = ScopeModel::where('isactive', 1)
+                    ->where('isdelete', 0)
+                    ->where('id', '<>', 1000)
+                    ->where('zoho_auth_id', $zoho_auth)
+                    ->get();
         $systemsetup = SystemSetupModel::first()->toArray();
+        $apiauth = ZohoAuthModel::where('id', $apis->zoho_auth_id)->first()->toArray();
         $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
         $zoho_scope = "";
 
@@ -92,6 +99,12 @@ class Main {
             }
         }
 
+        if($apiauth !== null){
+            foreach($apiauth as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+            }
+         }
+
         if($systemsetup !== null){
            foreach($systemsetup as $setup => $key){
                $query = str_replace("@".$setup, $key, $query);
@@ -99,16 +112,18 @@ class Main {
         }
 
         $query = str_replace("@scopes", $zoho_scope, $query);
-
+        
         return $query;
     }
-    public static function getapicode($code){
+    public static function getapicode($code, $zoho_auth){
         $apis = ZohoApiModel::from('zoho_api as a')
                     ->join('api_methods as b', 'a.api_method_id', 'b.id')
                     ->where('a.iscode', 1)
+                    ->where('a.zoho_auth_id', $zoho_auth)
                     ->select('a.*', 'b.method')
                     ->firstOrFail();
         $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+        $apiauth = ZohoAuthModel::where('id', $apis->zoho_auth_id)->first()->toArray();
         $systemsetup = SystemSetupModel::first()->toArray();
         $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
 
@@ -126,14 +141,20 @@ class Main {
         
         $query = str_replace("@code", $code, $query);
 
-        if($systemsetup !== null){
-            foreach($systemsetup as $setup => $key){
-                echo $setup."-".$key."<br />";
+        if($apiauth !== null){
+            foreach($apiauth as $setup => $key){
                 $query = str_replace("@".$setup, $key, $query);
                 
             }  
         }
-        
+
+        if($systemsetup !== null){
+            foreach($systemsetup as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+                
+            }  
+        }
+
         $apicon = new \GuzzleHttp\Client([
             'http_errors' => false,
         ]);
@@ -146,19 +167,22 @@ class Main {
         
         return $response;
     }
-    public static function validate_token(){
+    public static function validate_token($zoho_auth){
         $systemsetup = SystemSetupModel::firstOrFail();
+        $apiauth = ZohoAuthModel::where('id', $zoho_auth)->first();
 
-        if(Carbon::now()->lt($systemsetup->expires_in) !== false){
+        if(Carbon::now()->lt($apiauth->expires_in) !== false){
             $apis = ZohoApiModel::from('zoho_api as a')
                     ->join('api_methods as b', 'a.api_method_id', 'b.id')
                     ->where('a.isrefresh', 1)
+                    ->where('a.zoho_auth_id', $zoho_auth)
                     ->select('a.*', 'b.method')
                     ->firstOrFail();
             $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
-            $scopes = ScopeModel::where('isactive', 1)->where('isdelete', 0)->where('id', '<>', 1000)->get();
+            $scopes = ScopeModel::where('isactive', 1)->where('isdelete', 0)->where('id', '<>', 1000)->where('zoho_auth_id', $zoho_auth)->get();
             $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
             $systemsetup = $systemsetup->toArray();
+            $apiauth = $apiauth->toArray();
             $zoho_scope = "";
 
             if($params->count() > 0){
@@ -183,6 +207,12 @@ class Main {
                 }
             }
     
+            if($apiauth !== null){
+                foreach($apiauth as $setup => $key){
+                    $query = str_replace("@".$setup, $key, $query);
+                }
+            }
+    
             if($systemsetup !== null){
                 foreach($systemsetup as $setup => $key){
                     $query = str_replace("@".$setup, $key, $query);
@@ -203,7 +233,7 @@ class Main {
 
             
             if(!isset($reponse->error)){
-                SystemSetupModel::first()->update([
+                ZohoAuthModel::where('id', $zoho_auth)->update([
                     'access_token'=>$response->access_token,
                     'expires_in'=>Carbon::now()->addSeconds($response->expires_in)
                 ]);
@@ -224,6 +254,8 @@ class Main {
         $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
         $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
         $systemsetup = SystemSetupModel::first()->toArray();
+        $apiauth = ZohoAuthModel::where('id', $apis->zoho_auth_id)->first()->toArray();
+
         $query_params = 0;
         if($params->count() > 0){
             foreach($params as $param){
@@ -235,46 +267,52 @@ class Main {
                         $query .= $param->params_key."=".$param->params_value;
                     }
                 }elseif($param->params_type_id == 1002){
-                    if($systemsetup !== null){
+                    if($apiauth !== null){
                         $param_value = $param->params_value;
-                        foreach($systemsetup as $setup => $key){
+                        foreach($apiauth as $setup => $key){
                             $param_value = str_replace("@".$setup, $key, $param_value);
                         }
                         $headers[$param->params_key] = $param_value;
                     }
                 }
             }
-
-            if($addtlparam !== null){
-                $query = ($query_params == 1) ? $query."&" : $query;
-                foreach($addtlparam as $param => $key){
-                    if(collect($addtlparam)->last() !== $key){
-                        $query .= $param."=".$key."&";
-                    }else{
-                        $query .= $param."=".$key;
-                    }
-                }
-            }
-
-            if($systemsetup !== null){
-                foreach($systemsetup as $setup => $key){
-                    $query = str_replace("@".$setup, $key, $query);
-                }
-            }
-
-            $apicon = new \GuzzleHttp\Client([
-                'headers'=>$headers,
-                'http_errors' => false,
-            ]);
-    
-            $response = $apicon->request($apis->method, $query, [
-                'verify'=>false
-            ]);
-    
-            $response = json_decode($response->getBody());
-
-            return $response;
         }
+
+        if($addtlparam !== null){
+            $query = ($query_params == 1) ? $query."&" : $query;
+            foreach($addtlparam as $param => $key){
+                if(collect($addtlparam)->last() !== $key){
+                    $query .= $param."=".$key."&";
+                }else{
+                    $query .= $param."=".$key;
+                }
+            }
+        }
+
+        if($apiauth !== null){
+            foreach($apiauth as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+            }
+        }
+
+        if($systemsetup !== null){
+            foreach($systemsetup as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+            }
+        }
+        
+        $apicon = new \GuzzleHttp\Client([
+            'headers'=>$headers,
+            'http_errors' => false,
+        ]);
+
+        $response = $apicon->request($apis->method, $query, [
+            'verify'=>false
+        ]);
+
+        $response = json_decode($response->getBody());
+
+        return $response;
     }
     public static function syncagentdept($agent_id){
         $sql = "

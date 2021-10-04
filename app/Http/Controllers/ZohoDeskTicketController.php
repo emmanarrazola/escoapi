@@ -35,7 +35,7 @@ class ZohoDeskTicketController extends Controller
      */
     public function create()
     {
-        $validate_token = true; //Main::validate_token();
+        $validate_token = Main::validate_token(1001);
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
             
@@ -82,7 +82,7 @@ class ZohoDeskTicketController extends Controller
             };
             return redirect()->route('desk_tickets.index')->with('success', 'Desk Tickets Sync was Successful!');
         }else{
-            $query = Main::apiauthenticate();
+            $query = Main::apiauthenticate(1001);
 
             return redirect($query);
         }

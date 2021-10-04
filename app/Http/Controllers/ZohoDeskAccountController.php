@@ -31,7 +31,7 @@ class ZohoDeskAccountController extends Controller
      */
     public function create()
     {
-        $validate_token = Main::validate_token();
+        $validate_token = Main::validate_token(1001);
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
 
@@ -66,7 +66,7 @@ class ZohoDeskAccountController extends Controller
             }
             return redirect()->route('desk_accounts.index')->with('success', 'Desk Accounts Sync was Successful!');
         }else{
-            $query = Main::apiauthenticate();
+            $query = Main::apiauthenticate(1001);
 
             return redirect($query);
         }

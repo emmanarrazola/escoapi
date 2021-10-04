@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ZohoDeskTicketModel;
-
 use Illuminate\Http\Request;
+
+use App\Models\ZohoDeskTicketModel;
+use App\Models\DeskPayloadModel;
 
 class ApiController extends Controller
 {
@@ -43,5 +44,19 @@ class ApiController extends Controller
         $tickets = $tickets->get();
 
         return response()->json($tickets);
+    }
+    public function desk_payload(Request $request){
+        if($request->all() !== NULL){
+            $payload = json_encode($request->all());
+
+            if(DeskPayloadModel::create(['payload'=>$payload])){
+                return response()->json(['msg'=>'ok']);
+            };
+        }
+    }
+    public function zoho_form_webhooks(){
+        $payload = DeskPayloadModel::where('isconverted',0)->first();
+
+        return response()->json($payload);
     }
 }

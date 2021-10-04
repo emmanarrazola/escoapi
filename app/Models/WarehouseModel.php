@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ZohoApiModel extends Model
+class WarehouseModel extends Model
 {
-    protected $table = 'zoho_api';
+    use HasFactory;
+
+    protected $table = 'inv_warehouses';
 
     protected $guarded = [];
 }

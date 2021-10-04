@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+/* Desk */
 use App\Http\Controllers\ScopeController;
 use App\Http\Controllers\ZohoApiController;
 use App\Http\Controllers\ZohoDeskDeptController;
@@ -9,6 +10,12 @@ use App\Http\Controllers\ZohoDeskAgentController;
 use App\Http\Controllers\ZohoDeskTicketController;
 use App\Http\Controllers\ZohoDeskAccountController;
 use App\Http\Controllers\ParametersController;
+
+/* Inventory */
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\WarehouseController;
+
+/* API*/
 use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\ApiController;
 
@@ -43,11 +50,17 @@ Route::group(['middleware'=>'auth'], function(){
     Route::resource('parameters', ParametersController::class);
     Route::resource('desk_tickets', ZohoDeskTicketController::class);
     Route::resource('desk_accounts', ZohoDeskAccountController::class);
+    Route::resource('warehouses', WarehouseController::class);
+
+    Route::resource('items', ItemController::class);
 
     Route::get('/apiauth', [ApiAuthController::class, 'index'])->name('apiauth');
 });
 
 Route::get('/get_zoho_tickets', [ApiController::class, 'get_zoho_tickets'])->name('get_zoho_tickets');
+Route::get('/desk_payload', [ApiController::class, 'desk_payload'])->name('desk_payload');
+Route::get('/zoho_form_webhooks', [ApiController::class, 'zoho_form_webhooks'])->name('zoho_form_webhooks');
+
 
 
 

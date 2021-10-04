@@ -29,34 +29,31 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<table id="zohoapistbl" class="table table-sm table-bordered table-striped" style="width:100%">
+				<table id="itemstbl" class="table table-sm table-bordered table-striped" style="width:100%">
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>Description</th>
-							<th>Method</th>
-							<th>API Url</th>
+							<th>Name</th>
+							<th>Category</th>
 							<th>Active</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@if($zohoapis->count() > 0)
-							@foreach($zohoapis as $zohoapi)
+						@if($items->count() > 0)
+							@foreach($items as $item)
 								<tr>
-									<td class="align-middle">{{$zohoapi->id}}</td>
-									<td class="align-middle">{{$zohoapi->description}}</td>
-									<td class="align-middle">{{$zohoapi->method}}</td>
-									<td class="align-middle">{{$zohoapi->url}}</td>
-									@if($zohoapi->isactive == 1)
+									<td class="align-middle">{{$item->id}}</td>
+									<td class="align-middle"><div style="text-overflow:ellipsis;width:200px">{{$item->name}}</div></td>
+									<td class="align-middle">{{$item->category_name}}</td>
+									@if($item->status == 'active')
 									<td class="align-middle text-center"><span class="badge badge-success" style="width:50px">YES</span></td>
 									@else
 									<td class="align-middle text-center"><span class="badge badge-danger" style="width:50px">NO</span></td>
 									@endif
 									<td class="align-middle">
 										<div class="text-center"> 
-											<a href="{{route('zohoapi.edit', ['zohoapi'=>$zohoapi->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">Edit</button></a>
-											<button type="button" class="btn btn-outline-danger btn-sm text-sm" style="width:60px">Delete</button>
+											<a href="{{route('items.edit', ['item'=>$item->id])}}"><button type="button" class="btn btn-outline-primary btn-sm" style="width:60px">View</button></a>
 										</div>
 									</td>
 								</tr>
@@ -67,7 +64,7 @@
 			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
-				<a href="{{route('zohoapi.create')}}" class="btn btn-outline-success float-right">Create New</a>
+				<a href="{{route('desk_departments.create')}}" class="btn btn-outline-success float-right">Sync</a>
 			</div>
 			<!-- /.card-footer-->
 		</div>
@@ -110,11 +107,17 @@
 			Toast.fire({
 				icon: 'success',
 				title: '{{Session::get('success')}}'
-			})
+			});
+		@elseif(Session::get('warning'))
+			Toast.fire({
+				icon: 'warning',
+				title: '{{Session::get('warning')}}'
+			});
 		@endif
 
-		$("#zohoapistbl").DataTable({
-			'responsive':true
+		$("#itemstbl").DataTable({
+			'responsive':true,
+			'order':[['1','asc']]
 		});
 	})
 </script>

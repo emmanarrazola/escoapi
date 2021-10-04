@@ -31,33 +31,33 @@ class ZohoDeskAgentController extends Controller
      */
     public function create()
     {
-        $validate_token = Main::validate_token();
+        $validate_token = Main::validate_token(1001);
         if($validate_token !== false){
             $response = Main::getapidata(1006);
             if(!isset($response->error) && !isset($response->errorCode)){
                 $insert = Main::syncagents($response);
             }else{
-                return redirect()->route('desk_departments.index')->with('warning', $response->message);
+                return redirect()->route('desk_agents.index')->with('warning', $response->message);
             }
 
             $response = Main::getapidata(1006, ['status'=>'DISABLED']);
             if(!isset($response->error) && !isset($response->errorCode)){
                 $insert = Main::syncagents($response);
             }else{
-                return redirect()->route('desk_departments.index')->with('warning', $response->message);
+                return redirect()->route('desk_agents.index')->with('warning', $response->message);
             }
 
             $response = Main::getapidata(1006, ['status'=>'DELETED']);
             if(!isset($response->error) && !isset($response->errorCode)){
                 $insert = Main::syncagents($response);
             }else{
-                return redirect()->route('desk_departments.index')->with('warning', $response->message);
+                return redirect()->route('desk_agents.index')->with('warning', $response->message);
             }
 
-            return redirect()->route('desk_departments.index')->with('success', 'Desk Agents Sync was Successful!');
+            return redirect()->route('desk_agents.index')->with('success', 'Desk Agents Sync was Successful!');
             
         }else{
-            $query = Main::apiauthenticate();
+            $query = Main::apiauthenticate(1001);
 
             return redirect($query);
         }

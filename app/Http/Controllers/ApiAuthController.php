@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\SystemSetupModel;
+use App\Models\ZohoAuthModel;
 
 use App\Classes\Main;
 
@@ -21,16 +22,17 @@ class ApiAuthController extends Controller
     {
         if($request->code !== null){
             $code = $request->code;
-            $response = Main::getapicode($code);            
+            $zoho_auth_id = $request->zoho_auth_id;
+            $response = Main::getapicode($code, $zoho_auth_id);            
 
             if(!isset($response->error)){
-                SystemSetupModel::first()->update([
+                ZohoAuthModel::where('id', $zoho_auth_id)->update([
                     'access_token'=>$response->access_token,
                     'refresh_token'=>$response->refresh_token,
                     'expires_in'=>Carbon::now()->addSeconds($response->expires_in)
                 ]);
             }else{
-                SystemSetupModel::first()->update(['code'=>$code]);
+                ZohoAuthModel::where('id', $zoho_auth_id)->update(['code'=>$code]);
             }
             
             return redirect()->route('desk_departments.create');

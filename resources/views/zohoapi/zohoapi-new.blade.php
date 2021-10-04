@@ -7,6 +7,9 @@
         <link rel="stylesheet" href="{{asset('plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css')}}">
         <!-- Toastr -->
         <link rel="stylesheet" href="{{asset('plugins/toastr/toastr.min.css')}}">
+		<!-- Select2 -->
+		<link rel="stylesheet" href="{{asset('plugins/select2/css/select2.min.css')}}">
+  		<link rel="stylesheet" href="{{asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css')}}">
 	@endpush
 
 	<!-- Main content -->
@@ -41,8 +44,85 @@
 						</div>
 					</div>
 					<div class="form-group row">
+						<label for="method" class="col-sm-2 col-form-label">Method</label>
+						<div class="col-sm-10">
+							<select name="method" class="form-control form-control-sm select2 select2-sm" style="width:100%" id="method" data-placeholder="Method">
+								<option><option>
+								@if($methods->count() > 0)
+									@foreach($methods as $method)
+										<option value="{{$method->id}}">{{$method->description}}</option>
+									@endforeach
+								@endif
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="zohoauth" class="col-sm-2 col-form-label">Zoho Auth</label>
+						<div class="col-sm-10">
+							<select name="zohoauth" class="form-control form-control-sm select2 select2-sm" style="width:100%" id="zohoauth" data-placeholder="Zoho Auth">
+								<option><option>
+								@if($auths->count() > 0)
+									@foreach($auths as $auth)
+										@if($auth->id == old('zohoauth'))
+											<option selected value="{{$auth->id}}">{{$auth->description}}</option>
+										@else
+											<option value="{{$auth->id}}">{{$auth->description}}</option>
+										@endif
+									@endforeach
+								@endif
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="isrequest" class="col-sm-2 col-form-label">Is Request?</label>
+						<div class="custom-control custom-switch col-sm-10">
+							@if(old('isrequest', 0) == 1)
+								<input type="checkbox" name="isrequest" value="1" checked class="custom-control-input" id="isrequest">
+								<label class="custom-control-label ml-2 mt-1" for="isrequest"></label>
+							@else
+								<input type="checkbox" name="isrequest" value="1" class="custom-control-input" id="isrequest">
+								<label class="custom-control-label ml-2 mt-1" for="isrequest"></label>
+							@endif
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="isauth" class="col-sm-2 col-form-label">Is Auth?</label>
+						<div class="custom-control custom-switch col-sm-10">
+							@if(old('isauth', 0) == 1)
+								<input type="checkbox" name="isauth" value="1" checked class="custom-control-input" id="isauth">
+								<label class="custom-control-label ml-2 mt-1" for="isauth"></label>
+							@else
+								<input type="checkbox" name="isauth" value="1" class="custom-control-input" id="isauth">
+								<label class="custom-control-label ml-2 mt-1" for="isauth"></label>
+							@endif
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="iscode" class="col-sm-2 col-form-label">Is Get Code?</label>
+						<div class="custom-control custom-switch col-sm-10">
+							@if(old('iscode', 0) == 1)
+								<input type="checkbox" name="iscode" value="1" checked class="custom-control-input" id="iscode">
+								<label class="custom-control-label ml-2 mt-1" for="iscode"></label>
+							@else
+								<input type="checkbox" name="iscode" value="1" class="custom-control-input" id="iscode">
+								<label class="custom-control-label ml-2 mt-1" for="iscode"></label>
+							@endif
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="isrefresh" class="col-sm-2 col-form-label">Is Refresh Token?</label>
+						<div class="custom-control custom-switch col-sm-10">
+							@if(old('isrefresh', 0) == 1)
+								<input type="checkbox" name="isrefresh" value="1" checked class="custom-control-input" id="isrefresh">
+								<label class="custom-control-label ml-2 mt-1" for="isrefresh"></label>
+							@else
+								<input type="checkbox" name="isrefresh" value="1" class="custom-control-input" id="isrefresh">
+								<label class="custom-control-label ml-2 mt-1" for="isrefresh"></label>
+							@endif
+						</div>
+					</div>
+					<div class="form-group row">
 						<label for="isactive" class="col-sm-2 col-form-label">Active?</label>
-						
 						<div class="custom-control custom-switch col-sm-10">
 							@if(old('isactive', 1) == 1)
 								<input type="checkbox" name="isactive" value="1" checked class="custom-control-input" id="active">
@@ -71,10 +151,17 @@
         <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
         <!-- Toastr -->
         <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
+		<!-- Select2 -->
+		<script src="{{asset('plugins/select2/js/select2.full.min.js')}}"></script>
 	@endpush
 
 </x-app-layout>
 
 <script type="text/javascript">
-
+	$(function(){
+		$('.select2').select2({
+			theme: 'bootstrap4',
+			containerCssClass: ':all',
+		})
+	});
 </script>
