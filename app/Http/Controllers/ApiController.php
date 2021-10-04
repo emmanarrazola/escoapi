@@ -57,6 +57,6 @@ class ApiController extends Controller
     public function zoho_form_webhooks(){
         $payload = DeskPayloadModel::where('isconverted',0)->first();
 
-        return response()->json($payload);
+        return response()->json(json_decode($payload->payload));
     }
 }
