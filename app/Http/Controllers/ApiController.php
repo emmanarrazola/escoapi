@@ -51,7 +51,7 @@ class ApiController extends Controller
             'id as ID',
             'owner_name as Owner',
             'currency_symbol as Currency Symbol',
-            'Last_Activity_Time as Last Activity Tyime',
+            'Last_Activity_Time as Last Activity Time',
             'Industry as Industry',
             'state as State',
             'process_flow as Process Flow',
