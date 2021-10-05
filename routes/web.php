@@ -15,6 +15,9 @@ use App\Http\Controllers\ParametersController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\WarehouseController;
 
+/* CRM */
+use App\Http\Controllers\DealsController;
+
 /* API*/
 use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\ApiController;
@@ -51,6 +54,7 @@ Route::group(['middleware'=>'auth'], function(){
     Route::resource('desk_tickets', ZohoDeskTicketController::class);
     Route::resource('desk_accounts', ZohoDeskAccountController::class);
     Route::resource('warehouses', WarehouseController::class);
+    Route::resource('crm_deals', DealsController::class);
 
     Route::resource('items', ItemController::class);
 
@@ -58,6 +62,7 @@ Route::group(['middleware'=>'auth'], function(){
 });
 
 Route::get('/get_zoho_tickets', [ApiController::class, 'get_zoho_tickets'])->name('get_zoho_tickets');
+Route::get('/get_crm_deals', [ApiController::class, 'get_crm_deals'])->name('get_crm_deals');
 Route::get('/desk_payload', [ApiController::class, 'desk_payload'])->name('desk_payload');
 Route::get('/zoho_form_webhooks', [ApiController::class, 'zoho_form_webhooks'])->name('zoho_form_webhooks');
 

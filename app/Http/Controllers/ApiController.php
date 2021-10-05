@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\ZohoDeskTicketModel;
+use App\Models\DealsModel;
 use App\Models\DeskPayloadModel;
 
 class ApiController extends Controller
@@ -45,6 +46,73 @@ class ApiController extends Controller
 
         return response()->json($tickets);
     }
+    public function get_crm_deals(){
+        $deals = DealsModel::select(
+            'id as ID',
+            'owner_name as Owner',
+            'currency_symbol as Currency Symbol',
+            'Last_Activity_Time as Last Activity Tyime',
+            'Industry as Industry',
+            'state as State',
+            'process_flow as Process Flow',
+            'Deal_Name as Deal Name',
+            'Exchange_Rate as Exchange Rate',
+            'Currency as Currency',
+            'Stage as Stage',
+            'Solutions_Services as Solution Services',
+            'approved as Approved',
+            'approval_delegate as Is Delegate',
+            'approval_approve as Is Approve',
+            'approval_reject as Is Reject',
+            'approval_resubmit as Is Resubmit',
+            'Maintenance1 as Maintenance',
+            'Created_Time as Created Time',
+            'Change_Log_Time as Change Log Time',
+            'Duration_of_License_if_have as Duration of License',
+            'editable as Is Editable',
+            'Site_Location as Site Location',
+            'ELMO1 as ELMO',
+            'company_name as Company Name',
+            'created_name as Create By',
+            'Website_Form_Name as Website Form Name',
+            'Gross_Profit_Amount as Gross Profit Amount',
+            'category as Category',
+            'Description as Description',
+            'Campaign_Source as Campaign Source',
+            'review_process_approve as Review Process Is Approve',
+            'review_process_reject as Review Process Is Reject',
+            'review_process_resubmit as Review Process Is Resubmit',
+            'Closing_Date as Closing Date',
+            'Record_Image as Record Image',
+            'modified_by_name as Modified By',
+            'review as Review',
+            'Insightly_Reference_Number as Insightly Reference Number',
+            'Lead_Conversion_Time as Lead Conversion Time',
+            'Expected_Revenue as Expected Revenue',
+            'Overall_Sales_Duration as Overall Sales Duration',
+            'account_name as Account Name',
+            'Expected_Completion_Date as Expected Completion Date',
+            'Modified_Time as Modified Time',
+            'Amount as Amount',
+            'Probability as Probability',
+            'Next_Step as Next Step',
+            'GP as GP',
+            'orchestration as Orchestration',
+            'contact_name as Contact Name',
+            'Sales_Cycle_Duration as Sales Cycle Duration',
+            'Services as Services',
+            'in_merge as In Merge',
+            'Lead_Source as Lead Source',
+            'Tag as Tag',
+            'approval_state as Approval State'
+        )->get();
+
+        return response()->json($deals);
+    }
+
+
+
+    /* TRIGGERS */
     public function desk_payload(Request $request){
         if($request->all() !== NULL){
             $payload = json_encode($request->all());

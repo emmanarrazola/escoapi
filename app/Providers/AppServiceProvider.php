@@ -34,8 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         if (Schema::hasTable('modules')) {
-            
-            //
+
             view()->composer('*', function ($view) {
                 $userid = (isset(Auth::user()->id)) ? Auth::user()->id : false;
                 $usermodules = (new Main)->getmodules($userid, 1001);
@@ -55,7 +54,6 @@ class AppServiceProvider extends ServiceProvider
                             $activemodule = $modulenew->id;
                         }
                     }
-                    
                 }else{
                     $title = "Run Migration";
                 }
@@ -72,9 +70,10 @@ class AppServiceProvider extends ServiceProvider
                         $submodulenew = SubModuleModel::where('controllers', Request::segment(1))->first();
                         if(isset($submodulenew)){
                             $title = ($submodulenew->description) ? $submodulenew->description : "Run Migration";
-                            $activemodule = $submodule->module_id;
+                            $activemodule = $submodulenew->module_id;
                         }
                     }
+
                 }else{
                     $title = "Run Migration";
                 }
