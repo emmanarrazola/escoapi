@@ -81,7 +81,7 @@ class DealsController extends Controller
                             'Exchange_Rate'=>$deals->Exchange_Rate,
                             'Currency'=>$deals->Currency,
                             'Stage'=>$deals->Stage,
-                            'Solutions_Services'=>(isset($deals->Solution_Services)) ? implode("/", array_unique($deals->Solution_Services)) : null,
+                            'Solutions_Services'=>(isset($deals->Solutions_Services)) ? implode("/", array_unique($deals->Solutions_Services)) : null,
                             'approved'=>$deals->{'$approved'},
                             'Hostile_Mitigation'=>(isset($deals->Hostile_Mitigation)) ? implode("/", array_unique($deals->Hostile_Mitigation)) : null,
                             'approval_delegate'=>$deals->{'$approval'}->delegate,
