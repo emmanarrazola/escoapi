@@ -38,6 +38,7 @@
 							<th>Probability</th>
 							<th>Currency</th>
 							<th>Amount</th>
+							<th>Territory</th>
 							<th>Action</th>
 						</tr>
 					</thead>
@@ -51,6 +52,7 @@
 									<td class="align-middle">{{$deal->Probability}}</td>
 									<td class="align-middle">{{$deal->Currency}}</td>
 									<td class="align-middle">{{number_format($deal->Amount, 2, '.', ',')}}</td>
+									<td class="align-middle">{{$deal->Territory}}</td>
 									
 									<td class="align-middle">
 										<div class="text-center"> 
@@ -65,7 +67,7 @@
 			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
-				<a href="{{route('crm_deals.create')}}" class="btn btn-outline-success float-right">Create New</a>
+				<a href="{{route('crm_deals.create')}}" class="btn btn-outline-success float-right">Sync</a>
 			</div>
 			<!-- /.card-footer-->
 		</div>

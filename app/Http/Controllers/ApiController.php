@@ -65,6 +65,7 @@ class ApiController extends Controller
             'approval_approve as Is Approve',
             'approval_reject as Is Reject',
             'approval_resubmit as Is Resubmit',
+            'Territory as Territory',
             'Maintenance1 as Maintenance',
             'Created_Time as Created Time',
             'Change_Log_Time as Change Log Time',

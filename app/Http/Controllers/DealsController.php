@@ -38,7 +38,7 @@ class DealsController extends Controller
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
 
-            $addtlparam['page'] = 500;
+            $addtlparam['page'] = 1;
 
             $response = Main::getapidata(1011, $addtlparam);
             while($response !== null && count($response->data) !== 0){
@@ -88,7 +88,7 @@ class DealsController extends Controller
                             'approval_approve'=>$deals->{'$approval'}->approve,
                             'approval_reject'=>$deals->{'$approval'}->reject,
                             'approval_resubmit'=>$deals->{'$approval'}->resubmit,
-                            'Territory'=>json_encode($deals->Territory),
+                            'Territory'=>(isset($deals->Territory)) ? implode("/", array_unique($deals->Territory)) : null,
                             'Maintenance1'=>$deals->Maintenance1,
                             'Created_Time'=>$created_at,
                             'followed'=>$deals->{'$followed'},
