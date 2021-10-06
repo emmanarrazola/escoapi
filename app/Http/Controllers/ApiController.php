@@ -116,11 +116,17 @@ class ApiController extends Controller
     /* TRIGGERS */
     public function desk_payload(Request $request){
         if($request->all() !== NULL){
+            $count = count($request->all());
             $payload = json_encode($request->all());
-
-            if(DeskPayloadModel::create(['payload'=>$payload])){
-                return response()->json(['msg'=>'ok']);
-            };
+            if($count > 0){
+                if(DeskPayloadModel::create(['payload'=>$payload])){
+                    return response()->json(['msg'=>'ok']);
+                }else{
+                    return response()->json(['msg'=>'error']);   
+                }
+            }else{
+                return response()->json(['msg'=>'no payload data']);
+            }
         }
     }
     public function zoho_form_webhooks(){
