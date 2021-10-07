@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ApiController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::any('/desk_payload', [ApiController::class, 'desk_payload'])->name('desk_payload');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+

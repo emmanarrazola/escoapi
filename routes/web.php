@@ -63,7 +63,6 @@ Route::group(['middleware'=>'auth'], function(){
 
 Route::get('/get_zoho_tickets', [ApiController::class, 'get_zoho_tickets'])->name('get_zoho_tickets');
 Route::get('/get_crm_deals', [ApiController::class, 'get_crm_deals'])->name('get_crm_deals');
-Route::get('/desk_payload', [ApiController::class, 'desk_payload'])->name('desk_payload');
 Route::get('/zoho_form_webhooks', [ApiController::class, 'zoho_form_webhooks'])->name('zoho_form_webhooks');
 
 
