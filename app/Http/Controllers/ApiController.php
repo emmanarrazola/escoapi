@@ -47,7 +47,7 @@ class ApiController extends Controller
         return response()->json($tickets);
     }
     public function get_crm_deals(){
-        $deals = DealsModel::select(
+        $deals = DealsModel::where('isdelete', 0)->select(
             'id as ID',
             'owner_name as Owner',
             'currency_symbol as Currency Symbol',
