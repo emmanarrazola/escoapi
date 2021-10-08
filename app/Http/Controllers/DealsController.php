@@ -20,7 +20,7 @@ class DealsController extends Controller
      */
     public function index()
     {
-        $deals = DealsModel::all();
+        $deals = DealsModel::where('isdelete', 0)->get();
 
         return view('deals.deals-master', ['deals'=>$deals]);
     }
@@ -34,11 +34,13 @@ class DealsController extends Controller
     {
         ini_set('max_execution_time', '300');
         $validate_token = Main::validate_token(1001);
-        
+
+
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
 
             $addtlparam['page'] = 1;
+            $ids = [];
 
             $response = Main::getapidata(1011, $addtlparam);
             while($response !== null && count($response->data) !== 0){
@@ -137,12 +139,11 @@ class DealsController extends Controller
                             'Tag'=>json_encode($deals->Tag),
                             'approval_state'=>$deals->{'$approval_state'}
                         ];
-
+                        $ids[] = $deals->id;
                         try { 
                            
                             DealsModel::updateOrCreate(['id'=>$deals->id], $data);
                         } catch(\Illuminate\Database\QueryException $ex){ 
-                            dd($data);
                             dd($ex->getMessage()); 
                         }
                         
@@ -154,6 +155,7 @@ class DealsController extends Controller
                 $addtlparam['page']++;
                 $response = Main::getapidata(1011, $addtlparam);
             }
+            DealsModel::whereNotIn('id', $ids)->update(['isdelete'=>1]);
             return redirect()->route('crm_deals.index')->with('success', 'CRM Deals Sync was Successful!');
         }else{
             $query = Main::apiauthenticate(1001);
