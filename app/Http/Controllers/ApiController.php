@@ -45,7 +45,7 @@ class ApiController extends Controller
             'e.name as Department',
             'a.cf_root_cause as Root Cause'
         );
-        $tickets->where('isdelete', 0);
+        $tickets->where('a.isdelete', 0);
         $tickets = $tickets->get();
 
         return response()->json($tickets);
