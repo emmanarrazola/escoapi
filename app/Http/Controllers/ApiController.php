@@ -23,6 +23,7 @@ class ApiController extends Controller
         $tickets->leftJoin('zoho_desk_status as b', 'a.status', 'b.description');
         $tickets->leftJoin('zoho_desk_account as c', 'a.accountId', 'c.id');
         $tickets->leftJoin('zoho_desk_agent as d', 'a.agent_id', 'd.id');
+        $tickets->leftJoin('zoho_desk_dept as e', 'a.departmentId', 'e.id');
         $tickets->select(
             'a.id as ID', 
             'a.ticketNumber as Ticket Number',
@@ -40,8 +41,11 @@ class ApiController extends Controller
             'a.cf_room_name as Room Name', 
             'c.accountName as Company Name',
             'a.closedTime as Closed Date',
-            'a.cf_purpose as Purpose'
+            'a.cf_purpose as Purpose',
+            'e.name as Department',
+            'a.cf_root_cause as Root Cause'
         );
+        $ticket->where('isdelete', 0);
         $tickets = $tickets->get();
 
         return response()->json($tickets);

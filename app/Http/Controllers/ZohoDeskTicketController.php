@@ -23,6 +23,7 @@ class ZohoDeskTicketController extends Controller
         $tickets->leftJoin('zoho_desk_status as b', 'a.status', 'b.description');
         $tickets->leftJoin('zoho_desk_account as c', 'a.accountId', 'c.id');
         $tickets->select('a.*', 'b.description', 'b.color_class', 'c.accountName', 'a.accountId');
+        $tickets->where('a.isdelete', 0);
         $tickets = $tickets->get();
 
         return view('zohodesk-ticket.zohodesk-ticket-master', ['tickets'=>$tickets]);
@@ -43,6 +44,7 @@ class ZohoDeskTicketController extends Controller
             $addtlparam['from'] = 1;
             
             $response = Main::getapidata(1005, $addtlparam);
+            $ids = [];
             
             while($response !== null){
                 if(!isset($response->error) && !isset($response->errorCode)){
@@ -71,9 +73,12 @@ class ZohoDeskTicketController extends Controller
                             'cf_purpose'=>$ticket->cf->cf_purpose,
                             'agent_id'=>isset($ticket->assignee->id) ? $ticket->assignee->id : 1000,
                             'closedTime'=>$closed_date,
+                            'departmentId'=>$ticket->departmentId,
+                            'cf_root_cause'=>(isset($ticket->cf->cf_root_cause)) ? $ticket->cf->cf_root_cause : null
                         ];
     
                         ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
+                        $ids[] = $ticket->id;
                     }
                     $addtlparam['from'] += $systemsetup->ticket_limit;
                     $response = Main::getapidata(1005, $addtlparam);
@@ -81,6 +86,7 @@ class ZohoDeskTicketController extends Controller
                     return redirect()->route('desk_tickets.index')->with('warning', $response->message);
                 }
             };
+            ZohoDeskTicketModel::whereNotIn('id', $ids)->update(['isdelete'=>1]);
             return redirect()->route('desk_tickets.index')->with('success', 'Desk Tickets Sync was Successful!');
         }else{
             $query = Main::apiauthenticate(1001);
