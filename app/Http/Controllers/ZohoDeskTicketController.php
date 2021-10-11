@@ -35,6 +35,7 @@ class ZohoDeskTicketController extends Controller
      */
     public function create()
     {
+        ini_set('max_execution_time', '300');
         $validate_token = Main::validate_token(1001);
         if($validate_token !== false){
             $systemsetup = SystemSetupModel::first();
