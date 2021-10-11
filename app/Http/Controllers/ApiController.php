@@ -122,14 +122,11 @@ class ApiController extends Controller
         if($request->all() !== NULL){
             $count = count($request->all());
             $payload = json_encode($request->all());
-            if($count > 0){
-                if(DeskPayloadModel::create(['payload'=>$payload])){
-                    return response()->json(['msg'=>'ok']);
-                }else{
-                    return response()->json(['msg'=>'error']);   
-                }
+            
+            if(DeskPayloadModel::create(['payload'=>$payload])){
+                return response()->json(['msg'=>'ok']);
             }else{
-                return response()->json(['msg'=>'no payload data']);
+                return response()->json(['msg'=>'error']);   
             }
         }
     }
