@@ -68,7 +68,7 @@ class ZohoDeskTicketController extends Controller
                             'cf_requester'=>$ticket->cf->cf_requester,
                             'cf_room_name'=>$ticket->cf->cf_room_name,
                             'cf_purpose'=>$ticket->cf->cf_purpose,
-                            'agent_id'=>$ticket->assignee->id,
+                            'agent_id'=>isset($ticket->assignee->id) ? $ticket->assignee->id : 1000,
                             'closedTime'=>$closed_date,
                         ];
     
