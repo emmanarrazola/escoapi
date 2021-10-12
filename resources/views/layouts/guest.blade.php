@@ -18,8 +18,16 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{asset('dist/css/adminlte.min.css')}}">
 
+        @stack('styles')
+
+        @stack('scripts')
+
     </head>
     <body class="hold-transition login-page">
+
         {{ $slot }}
+        
     </body>
+
+    
 </html>
