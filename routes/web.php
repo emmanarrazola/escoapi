@@ -39,6 +39,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/listener', function (){
+    return view('listener');
+});
 
 
 Route::group(['middleware'=>'auth'], function(){

@@ -48,13 +48,13 @@ class DealsController extends Controller
                 if(!isset($response->error) && !isset($response->errorCode)){
                     foreach($response->data as $deals){
                         
-                        $created_at = Carbon::parse($deals->Created_Time)->format('Y-m-d H:i:s');
-                        $modified_at = Carbon::parse($deals->Modified_Time)->format('Y-m-d H:i:s');
-                        $closing_date = Carbon::parse($deals->Closing_Date)->format('Y-m-d H:i:s');
-                        $completion_date = Carbon::parse($deals->Expected_Completion_Date)->format('Y-m-d H:i:s');
-                        $last_activity_time = Carbon::parse($deals->Last_Activity_Time)->format('Y-m-d H:i:s');
-                        $change_log_time = Carbon::parse($deals->Change_Log_Time__s)->format('Y-m-d H:i:s');
-                        $s = Carbon::parse($deals->s)->format('Y-m-d H:i:s');
+                        $created_at = (isset($deals->Created_Time)) ? Carbon::parse($deals->Created_Time)->format('Y-m-d H:i:s') : null;
+                        $modified_at = (isset($deals->Modified_time)) ? Carbon::parse($deals->Modified_Time)->format('Y-m-d H:i:s') : null;
+                        $closing_date = (isset($deals->Closing_date)) ? Carbon::parse($deals->Closing_Date)->format('Y-m-d H:i:s') : null;
+                        $completion_date = (isset($deals->Expected_Completion_Date)) ? Carbon::parse($deals->Expected_Completion_Date)->format('Y-m-d H:i:s') : null;
+                        $last_activity_time = (isset($deals->Last_Activity_Time)) ? Carbon::parse($deals->Last_Activity_Time)->format('Y-m-d H:i:s') : null;
+                        $change_log_time = (isset($deals->Change_Log_time__s)) ? Carbon::parse($deals->Change_Log_Time__s)->format('Y-m-d H:i:s') : null;
+                        $s = (isset($deals->s)) ? Carbon::parse($deals->s)->format('Y-m-d H:i:s') : null;
 
                         
                         $lead_conversion_time = (isset($deals->Lead_Conversion_Time)) ? $deals->Lead_Conversion_Time : 0.00;
@@ -141,6 +141,9 @@ class DealsController extends Controller
                         ];
                         $ids[] = $deals->id;
                         try { 
+                            // if($deals->id == 4853750000006843190){
+                            //     dd($closing_date);
+                            // }
                            
                             DealsModel::updateOrCreate(['id'=>$deals->id], $data);
                         } catch(\Illuminate\Database\QueryException $ex){ 

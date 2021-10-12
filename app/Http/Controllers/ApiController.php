@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\ZohoDeskTicketModel;
 use App\Models\DealsModel;
-use App\Models\DeskPayloadModel;
+use App\Models\PayloadModel;
 
 class ApiController extends Controller
 {
@@ -118,12 +118,60 @@ class ApiController extends Controller
 
 
     /* TRIGGERS */
-    public function desk_payload(Request $request){
+    public function desk_add_task(Request $request){
         if($request->all() !== NULL){
             $count = count($request->all());
             $payload = json_encode($request->all());
             
-            if(DeskPayloadModel::create(['payload'=>$payload])){
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1001
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function desk_edit_task(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1002
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function desk_add_ticket(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1003
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function desk_edit_ticket(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1004
+            ])){
                 return response()->json(['msg'=>'ok']);
             }else{
                 return response()->json(['msg'=>'error']);   
@@ -131,7 +179,7 @@ class ApiController extends Controller
         }
     }
     public function zoho_form_webhooks(){
-        $payload = DeskPayloadModel::where('isconverted',0)->first();
+        $payload = PayloadModel::where('isconverted',0)->first();
 
         return response()->json(json_decode($payload->payload));
     }
