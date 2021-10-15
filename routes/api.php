@@ -16,7 +16,10 @@ use App\Http\Controllers\ApiController;
 |
 */
 
-Route::any('/desk_payload', [ApiController::class, 'desk_payload'])->name('desk_payload');
+Route::any('/desk_add_task', [ApiController::class, 'desk_add_task'])->name('desk_add_task');
+Route::any('/desk_edit_task', [ApiController::class, 'desk_edit_task'])->name('desk_edit_task');
+Route::any('/desk_add_ticket', [ApiController::class, 'desk_add_ticket'])->name('desk_add_ticket');
+Route::any('/desk_edit_ticket', [ApiController::class, 'desk_edit_ticket'])->name('desk_edit_ticket');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
