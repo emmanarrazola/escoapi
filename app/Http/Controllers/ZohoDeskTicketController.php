@@ -53,7 +53,7 @@ class ZohoDeskTicketController extends Controller
                         $due_date = Carbon::parse($ticket->dueDate)->format('Y-m-d H:i:s');
                         $required_date = Carbon::parse($ticket->cf->cf_required_date)->format('Y-m-d H:i:s');
                         $closed_date = Carbon::parse($ticket->closedTime)->format('Y-m-d H:i:s');
-
+                        
                         $data = [
                             'ticketNumber'=>$ticket->ticketNumber,
                             'subject'=>$ticket->subject,
@@ -74,10 +74,13 @@ class ZohoDeskTicketController extends Controller
                             'agent_id'=>isset($ticket->assignee->id) ? $ticket->assignee->id : 1000,
                             'closedTime'=>$closed_date,
                             'departmentId'=>$ticket->departmentId,
-                            'cf_root_cause'=>(isset($ticket->cf->cf_root_cause)) ? $ticket->cf->cf_root_cause : null
+                            'cf_root_cause'=>(isset($ticket->cf->cf_root_cause_1)) ? $ticket->cf->cf_root_cause_1 : null
                         ];
+                        if(isset($ticket->cf->cf_root_cause_1)){
+                            dd($ticket);
+                        }
     
-                        ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
+                        //ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
                         $ids[] = $ticket->id;
                     }
                     $addtlparam['from'] += $systemsetup->ticket_limit;

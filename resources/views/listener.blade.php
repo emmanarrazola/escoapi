@@ -25,18 +25,8 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <h4 style="text-align:center">Current Activity</h4>
-                        <ul class="list-group">
-                            <li class="list-group-item text-center">
-                                <span id="curractivity">Waiting for Task </span><i class="fa fa-circle-notch fa-spin"></i>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Add <span id="queue" class="float-right badge bg-blue">0</span>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Edit <span id="warning" class="float-right badge bg-green">0</span>
-                            </li> 
-                            <li class="list-group-item">Warnings <span class="badge float-right bg-red" id="gateway">0</span></li> 
-                        </ul>
+                        
+                        @livewire('listener-queue')
                     </div>
                 </div>
             </div>
@@ -56,3 +46,21 @@
     @endpush
 
 </x-guest-layout>
+
+<script type="text/javascript">
+    window.addEventListener('statusupdate', event=>{
+		console.log(event.detail.loop);
+		// if(event.detail.reload == 0){
+		// 	if(event.detail.loop < 10){
+		// 		clearTimeout(t);
+		// 		t = window.setTimeout(function(){
+		// 		Livewire.emit('getpatstatus');
+		// 		}, event.detail.timeout);
+		// 	}else{
+		// 		location.reload(true);
+		// 	}
+		// }else{
+		//   location.reload(true);
+		// }
+	});
+</script>

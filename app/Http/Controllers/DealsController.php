@@ -8,7 +8,6 @@ use Carbon\Carbon;
 
 use App\Models\SystemSetupModel;
 use App\Models\DealsModel;
-
 use App\Classes\Main;
 
 class DealsController extends Controller

@@ -2,6 +2,8 @@
 namespace App\Classes;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use App\Models\UserModuleModel;
 use App\Models\UserSubModuleModel;
@@ -112,6 +114,8 @@ class Main {
         }
 
         $query = str_replace("@scopes", $zoho_scope, $query);
+
+        session(['apiredirect'=>URL::current()]);
         
         return $query;
     }
@@ -243,6 +247,77 @@ class Main {
             }
         }else{
             return false;
+        }
+    }
+    public static function refresh_token($zoho_auth){
+        $systemsetup = SystemSetupModel::firstOrFail();
+        $apiauth = ZohoAuthModel::where('id', $zoho_auth)->first();
+        $diff = Carbon::parse($apiauth->expires_in)->diffInSeconds(now());
+
+        if($diff > 0 && $diff <= 300){
+            
+            $apis = ZohoApiModel::from('zoho_api as a')->where('a.zoho_auth_id', $zoho_auth)
+                    ->join('api_methods as b', 'b.id', 'a.api_method_id')
+                    ->where('a.isrefresh', 1)
+                    ->select('a.*', 'b.method')
+                    ->first();
+            $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+            $query = (strpos($apis->url, '?') !== false) ? $apis->url."&" : $apis->url."?";
+            $apiauth = $apiauth->toArray();
+            
+            if($params->count() > 0){
+                foreach($params as $param){
+                    if($param->params_type_id == 1004){
+                        if($param->id !== $params->last()->id){
+                            $query .= $param->params_key."=".$param->params_value."&";
+                        }else{
+                            $query .= $param->params_key."=".$param->params_value;
+                        }
+                    }
+                }
+            }
+
+            if($apiauth !== null){
+                foreach($apiauth as $auth => $key){
+                    $query = str_replace("@".$auth, $key, $query);
+                }
+            }
+
+            if($systemsetup !== null){
+                foreach($systemsetup as $setup => $key){
+                    $query = str_replace("@".$setup, $key, $query);
+                }
+            }
+            
+            $apicon = new \GuzzleHttp\Client([
+                'http_errors' => false,
+            ]);
+    
+            $response = $apicon->request($apis->method, $query, [
+                'verify'=>false
+            ]);
+
+            $response = json_decode($response->getBody());
+
+            if(!isset($reponse->error)){
+                ZohoAuthModel::where('id', $zoho_auth)->update([
+                    'access_token'=>$response->access_token,
+                    'expires_in'=>Carbon::now()->addSeconds($response->expires_in)
+                ]);
+                return true;
+            }else{
+                return false;
+            }
+
+        }elseif($diff <= 0){
+            $validate_token = Main::apiauthenticate(1001);;
+            if($validate_token === false){
+                $query = Main::apiauthenticate(1001);
+                return redirect($query);
+            }
+            return true;
+        }else{
+            return true;
         }
     }
     public static function getapidata($apicode, $addtlparam = null){

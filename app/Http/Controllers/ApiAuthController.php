@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
 use App\Models\SystemSetupModel;
@@ -34,8 +35,8 @@ class ApiAuthController extends Controller
             }else{
                 ZohoAuthModel::where('id', $zoho_auth_id)->update(['code'=>$code]);
             }
-            
-            return redirect()->route('desk_departments.create');
+
+            return redirect(Session::get('apiredirect'));
         }else{
             abort(404);
         }
