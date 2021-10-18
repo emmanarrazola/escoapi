@@ -76,11 +76,8 @@ class ZohoDeskTicketController extends Controller
                             'departmentId'=>$ticket->departmentId,
                             'cf_root_cause'=>(isset($ticket->cf->cf_root_cause_1)) ? $ticket->cf->cf_root_cause_1 : null
                         ];
-                        if(isset($ticket->cf->cf_root_cause_1)){
-                            dd($ticket);
-                        }
-    
-                        //ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
+                        
+                        ZohoDeskTicketModel::updateOrCreate(['id'=>$ticket->id], $data);
                         $ids[] = $ticket->id;
                     }
                     $addtlparam['from'] += $systemsetup->ticket_limit;
