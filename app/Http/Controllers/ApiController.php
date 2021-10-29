@@ -178,6 +178,21 @@ class ApiController extends Controller
             }
         }
     }
+    public function desk_delete_ticket(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1008
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
     public function zoho_form_webhooks(){
         $payload = PayloadModel::where('isconverted',0)->first();
 

@@ -27,13 +27,16 @@
                         <h4 style="text-align:center">Current Activity</h4>
                         <ul class="list-group">
                             <li class="list-group-item text-center">
-                                <span id="curractivity">Starting API Connection </span><i class="fa fa-circle-notch fa-spin"></i>
+                                <span id="curr_activity">Connecting to Database </span><i class="fa fa-circle-notch fa-spin"></i>
                             </li>
                             <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Add <span id="addtask" class="float-right badge bg-blue">0</span>
+                                <i class="fa fa-circle-notch fa-spin"></i> Add <span id="add_task" class="float-right badge bg-blue">0</span>
                             </li>
                             <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Edit <span id="edittask" class="float-right badge bg-green">0</span>
+                                <i class="fa fa-circle-notch fa-spin"></i> Edit <span id="edit_task" class="float-right badge bg-green">0</span>
+                            </li> 
+                            <li class="list-group-item">
+                                <i class="fa fa-circle-notch fa-spin"></i> Converted <span id="converted_task" class="float-right badge bg-info">0</span>
                             </li> 
                             <li class="list-group-item">Warnings <span class="badge float-right bg-red" id="warning">0</span></li> 
                         </ul>
@@ -58,25 +61,41 @@
 
 </x-guest-layout>
 
-<script type="text/javascript">
-    window.addEventListener('statusupdate', event=>{
-		console.log(event.detail.loop);
-		// if(event.detail.reload == 0){
-		// 	if(event.detail.loop < 10){
-		// 		clearTimeout(t);
-		// 		t = window.setTimeout(function(){
-		// 		Livewire.emit('getpatstatus');
-		// 		}, event.detail.timeout);
-		// 	}else{
-		// 		location.reload(true);
-		// 	}
-		// }else{
-		//   location.reload(true);
-		// }
-	});
 
-    document.addEventListener('livewire:load', function () {
-        Livewire.emit('create_service_report');
-        // Your JS here.
-    });
+<script src="{{asset('plugins/jquery/jquery.min.js')}}"></script>
+<script type="text/javascript">
+        document.addEventListener('livewire:load', function () {
+            $(function(){
+                var t;
+                Livewire.emit('payload_listener');
+
+                window.addEventListener('update_task_count', event=>{
+                    $("#add_task").text(event.detail.add);
+                    $("#edit_task").text(event.detail.edit);
+                    $("#converted_task").text(event.detail.converted);
+                    $("#curr_activity").text(event.detail.msg);
+
+
+                    if(event.detail.reload == 0){
+                    	if(event.detail.loop < 20){
+                    		clearTimeout(t);
+                    		t = window.setTimeout(function(){
+                    		    Livewire.emit('payload_listener');
+                    		}, event.detail.timeout);
+                    	}else{
+                    		location.reload(true);
+                    	}
+                    }else{
+                        location.reload(true);
+                    }
+                });
+            });
+
+            window.livewire.onError(statusCode => {
+                if (statusCode === 500) {
+                    location.reload(true);
+                }
+                return false;
+            });
+        });
 </script>

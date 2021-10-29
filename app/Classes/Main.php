@@ -455,4 +455,78 @@ class Main {
             return false;
         }
     }
+    public static function buildapiurl($apicode, $addtlparam = null, $segments = null){
+        $apis = ZohoApiModel::from('zoho_api as a')
+                    ->join('api_methods as b', 'a.api_method_id', 'b.id')
+                    ->where('a.id', $apicode)
+                    ->select('a.*', 'b.method')
+                    ->firstOrFail();
+
+
+
+        $params = ParametersModel::where('zoho_api_id', $apis->id)->where('isactive', 1)->where('isdelete', 0)->get();
+        $query = $apis->url;
+        
+        if($segments !== null){
+            foreach($segments as $segment){
+                
+                $query .= "/".$segment;
+            }
+        }
+
+        $query .= (strpos($query, '?') !== false) ? "&" : "?";
+
+        $systemsetup = SystemSetupModel::first()->toArray();
+        $apiauth = ZohoAuthModel::where('id', $apis->zoho_auth_id)->first()->toArray();
+
+        $query_params = 0;
+        if($params->count() > 0){
+            foreach($params as $param){
+                if($param->params_type_id == 1004){
+                    $query_params = 1;
+                    if($param->id !== $params->last()->id){
+                        $query .= $param->params_key."=".$param->params_value."&";
+                    }else{
+                        $query .= $param->params_key."=".$param->params_value;
+                    }
+                }elseif($param->params_type_id == 1002){
+                    if($apiauth !== null){
+                        $param_value = $param->params_value;
+                        foreach($apiauth as $setup => $key){
+                            $param_value = str_replace("@".$setup, $key, $param_value);
+                        }
+                        $headers[$param->params_key] = $param_value;
+                    }
+                }
+            }
+        }
+
+        if($addtlparam !== null){
+            $query = ($query_params == 1) ? $query."&" : $query;
+            foreach($addtlparam as $param => $key){
+                if(collect($addtlparam)->last() !== $key){
+                    $query .= $param."=".$key."&";
+                }else{
+                    $query .= $param."=".$key;
+                }
+            }
+        }
+
+        if($apiauth !== null){
+            foreach($apiauth as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+            }
+        }
+
+        if($systemsetup !== null){
+            foreach($systemsetup as $setup => $key){
+                $query = str_replace("@".$setup, $key, $query);
+            }
+        }
+
+        return [
+            'query'=>$query,
+            'headers'=>(isset($headers)) ? $headers : false
+        ];
+    }
 }

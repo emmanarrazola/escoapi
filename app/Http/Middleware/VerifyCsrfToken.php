@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        'livewire/message/system-datetime',
+        'livewire/message/listener-queue',
     ];
 }

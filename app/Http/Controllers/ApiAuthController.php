@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use App\Models\SystemSetupModel;
@@ -21,6 +22,7 @@ class ApiAuthController extends Controller
      */
     public function index(Request $request)
     {
+        
         if($request->code !== null){
             $code = $request->code;
             $zoho_auth_id = $request->zoho_auth_id;
@@ -36,7 +38,11 @@ class ApiAuthController extends Controller
                 ZohoAuthModel::where('id', $zoho_auth_id)->update(['code'=>$code]);
             }
 
-            return redirect(Session::get('apiredirect'));
+            if(Auth::user() !== null){
+                return redirect(Session::get('apiredirect'));
+            }else{
+                return redirect(url('/listener'));
+            }
         }else{
             abort(404);
         }
