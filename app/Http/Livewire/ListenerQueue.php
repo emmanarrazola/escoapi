@@ -124,6 +124,11 @@ class ListenerQueue extends Component
                     $this->message = "Error Converting Ticket Number: ".$zohopayload->ticketNumber;
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }
+            }elseif($data->payload_type_id == 1008){
+                $ticket = ZohoDeskTicketModel::where('id',$zohopayload->id)->update([
+                    'isdelete'=>1
+                ]);
+                $this->message = "Deleting Ticket Number: ".$zohopayload->ticketNumber;
             }    
         }else{
             $this->message = "Waiting for Queue...";
