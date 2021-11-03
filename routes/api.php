@@ -16,10 +16,15 @@ use App\Http\Controllers\ApiController;
 |
 */
 
+/* ZOHO DESK */
 Route::any('/desk_add_task', [ApiController::class, 'desk_add_task'])->name('desk_add_task');
 Route::any('/desk_edit_task', [ApiController::class, 'desk_edit_task'])->name('desk_edit_task');
 Route::any('/desk_add_ticket', [ApiController::class, 'desk_add_ticket'])->name('desk_add_ticket');
 Route::any('/desk_edit_ticket', [ApiController::class, 'desk_edit_ticket'])->name('desk_edit_ticket');
+/* CRM */
+Route::any('/crm_add_deals', [ApiController::class, 'crm_add_deals'])->name('crm_add_deals');
+Route::any('/crm_adit_deals', [ApiController::class, 'crm_adit_deals'])->name('crm_adit_deals');
+Route::any('/crm_delete_deals', [ApiController::class, 'crm_delete_deals'])->name('crm_delete_deals');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

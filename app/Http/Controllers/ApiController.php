@@ -193,6 +193,51 @@ class ApiController extends Controller
             }
         }
     }
+    public function crm_add_deals(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1005
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function crm_edit_deals(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1006
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function crm_delete_deals(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1009
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
     public function zoho_form_webhooks(){
         $payload = PayloadModel::where('isconverted',0)->first();
 
