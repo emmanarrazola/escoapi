@@ -77,7 +77,8 @@
 
 
                     if(event.detail.reload == 0){
-                    	if(event.detail.loop < 20){
+                        console.log(event.detail.loop);
+                    	if(event.detail.loop < 50){
                     		clearTimeout(t);
                     		t = window.setTimeout(function(){
                     		    Livewire.emit('payload_listener');
