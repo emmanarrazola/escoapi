@@ -42,7 +42,7 @@ class DealsController extends Controller
             $ids = [];
 
             $response = Main::getapidata(1011, $addtlparam);
-            while($response !== null && count($response->data) !== 0){
+            while(isset($response->data) && count($response->data) !== 0){
                 
                 if(!isset($response->error) && !isset($response->errorCode)){
                     foreach($response->data as $deals){
@@ -90,7 +90,7 @@ class DealsController extends Controller
                             'approval_reject'=>$deals->{'$approval'}->reject,
                             'approval_resubmit'=>$deals->{'$approval'}->resubmit,
                             'Territory'=>(isset($deals->Territory)) ? implode("/", array_unique($deals->Territory)) : null,
-                            'Maintenance1'=>$deals->Maintenance1,
+                            'Maintenance1'=>isset($deals->Maintenance1) ? $deals->Maintenance1 : null,
                             'Created_Time'=>$created_at,
                             'followed'=>$deals->{'$followed'},
                             'Change_Log_Time'=>$change_log_time,
