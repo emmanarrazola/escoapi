@@ -60,7 +60,7 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0);//->where('payload_type_id','1001');
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->where('payload_type_id', '<>','1008');
         $count = $payloads->count();
         if($count > 0){
             $this->timeout = 500;
@@ -117,11 +117,14 @@ class ListenerQueue extends Component
                 }
             }elseif($data->payload_type_id == 1001){
                 $retval = $this->create_service_report($zohopayload);
-                if($retval->code == 3000){
-                    $this->message = "Add Service Report for: ".$zohopayload->ticketNumber;
+                
+                if($retval->code == '3000'){
+                    
+                    // dd($zohopayload);
+                    $this->message = "Add Service Report";
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }else{
-                    $this->message = "Error Converting Ticket Number: ".$zohopayload->ticketNumber;
+                    $this->message = "Error Converting Ticket";
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }
             }elseif($data->payload_type_id == 1008){
@@ -132,7 +135,7 @@ class ListenerQueue extends Component
             }    
         }else{
             $this->message = "Waiting for Queue...";
-            $this->timeout = 2000;
+            $this->timeout = 5000;
         }
 
         $this->loop++;
@@ -140,7 +143,7 @@ class ListenerQueue extends Component
     }
     public function create_service_report($data){
         $build = Main::buildapiurl(1012, ['include'=>'contacts,assignee,departments'], [$data->ticketId]);
-
+        
         // dd($data);
         // dd($build['headers']);
 
@@ -174,6 +177,7 @@ class ListenerQueue extends Component
             ],
             'Department'=>$response->department->name,
         ];
+
 
         $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Service_Report", [
             'verify'=>false,
