@@ -60,13 +60,12 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->where('payload_type_id', '<>','1008');
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1001,1002,1008]);
         $count = $payloads->count();
         if($count > 0){
             $this->timeout = 500;
             $data = $payloads->first();
             $zohopayload = json_decode($data->payload)[0]->payload;
-            
             if($data->payload_type_id == 1003 || $data->payload_type_id == 1004){
                 
                 $created_at = Carbon::parse($zohopayload->createdTime)->format('Y-m-d H:i:s');
@@ -115,9 +114,9 @@ class ListenerQueue extends Component
                     PayloadModel::where('id', $payloads->first()->id)->update(['isfailed'=>1]);
                     $this->reload = 1;
                 }
-            }elseif($data->payload_type_id == 1001){
-                $retval = $this->create_service_report($zohopayload);
+            }elseif($data->payload_type_id == 1001 || $data->payload_type_id == 1002){
                 
+                $retval = $this->create_service_report($zohopayload);
                 if($retval->code == '3000'){
                     
                     // dd($zohopayload);
@@ -125,9 +124,10 @@ class ListenerQueue extends Component
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }else{
                     $this->message = "Error Converting Ticket";
-                    PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
+                    //PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }
             }elseif($data->payload_type_id == 1008){
+                
                 $ticket = ZohoDeskTicketModel::where('id',$zohopayload->id)->update([
                     'isdelete'=>1
                 ]);
@@ -178,7 +178,7 @@ class ListenerQueue extends Component
             'Department'=>$response->department->name,
         ];
 
-
+        // dd($data);
         $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Service_Report", [
             'verify'=>false,
             'body'=>json_encode(array(
@@ -187,6 +187,8 @@ class ListenerQueue extends Component
         ]);
 
         $response = json_decode($response->getBody());
+
+        dd($response);
 
         return $response;
     }

@@ -94,7 +94,7 @@
 
             window.livewire.onError(statusCode => {
                 if (statusCode === 500) {
-                    location.reload(true);
+                    // location.reload(true);
                 }
                 return false;
             });
