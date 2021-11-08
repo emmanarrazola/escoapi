@@ -60,7 +60,7 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->where('payload_type_id', '<>','1008');
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1001,1002,1008]);
         $count = $payloads->count();
         if($count > 0){
             $this->timeout = 500;
