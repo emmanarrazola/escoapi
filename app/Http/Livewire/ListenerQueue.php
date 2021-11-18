@@ -50,6 +50,7 @@ class ListenerQueue extends Component
         $data = array(
             'add'=>(isset($unconverted['add'])) ? $unconverted['add'] : 0,
             'edit'=>(isset($unconverted['edit'])) ? $unconverted['edit'] : 0,
+            'delete'=>(isset($unconverted['delete'])) ? $unconverted['delete'] : 0,
             'converted'=>$converted->task_count,
             'timeout'=>$this->timeout,
             'reload'=>$this->reload,
@@ -60,7 +61,8 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1001,1002,1008]);
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1002]);
+        
         $count = $payloads->count();
         if($count > 0){
             $this->timeout = 500;
@@ -114,7 +116,7 @@ class ListenerQueue extends Component
                     PayloadModel::where('id', $payloads->first()->id)->update(['isfailed'=>1]);
                     $this->reload = 1;
                 }
-            }elseif($data->payload_type_id == 1001 || $data->payload_type_id == 1002){
+            }elseif($data->payload_type_id == 1001){
                 
                 $retval = $this->create_service_report($zohopayload);
                 if($retval->code == '3000'){
@@ -131,7 +133,8 @@ class ListenerQueue extends Component
                 $ticket = ZohoDeskTicketModel::where('id',$zohopayload->id)->update([
                     'isdelete'=>1
                 ]);
-                $this->message = "Deleting Ticket Number: ".$zohopayload->ticketNumber;
+                $this->message = "Deleting Ticket";
+                PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
             }    
         }else{
             $this->message = "Waiting for Queue...";
@@ -142,8 +145,9 @@ class ListenerQueue extends Component
         $this->get_task_count();    
     }
     public function create_service_report($data){
-        $build = Main::buildapiurl(1012, ['include'=>'contacts,assignee,departments'], [$data->ticketId]);
+        $build = Main::buildapiurl(1012, ['include'=>'contacts,assignee,departments,products'], ['351081000048847001']);
         
+        // dd($build);
         // dd($data);
         // dd($build['headers']);
 
@@ -156,41 +160,81 @@ class ListenerQueue extends Component
             'verify'=>false,
         ]);
 
-        $response = json_decode($response->getBody());
+        
+        $statuscode = $response->getStatusCode();
+        if($statuscode !== 401){
+            
+            $response = json_decode($response->getBody());
 
-        $data = [
-            'Ticket_Number'=>$response->ticketNumber,
-            'SOR'=>$response->cf->cf_swo_no,
-            'Issue_Request'=>$response->cf->cf_purpose,
-            'Contact_Name'=>[
-                'first_name'=>$response->contact->firstName,
-                'last_name'=>$response->contact->lastName
-            ],
-            'Client_Name'=>$response->contact->account->accountName,
-            'Email'=>$response->contact->email,
-            'Floor'=>$response->cf->cf_floor,
-            'Site_Location'=>$response->cf->cf_location_1,
-            'Room_Name'=>$response->cf->cf_room_name,
-            'Name'=>[
-                'first_name'=>$response->assignee->firstName,
-                'last_name'=>$response->assignee->lastName
-            ],
-            'Department'=>$response->department->name,
-        ];
+            
+            $data = [
+                /* Ticket Number */
+                'Ticket_Number'=>$response->ticketNumber,
+                'Services_AM_Email'=>'default@gmail.com',
+                /* CLIENT INFO */
+                'Client_Name'=>isset($response->contact->account->accountName) ? $response->contact->account->accountName : "<Blank>",
+                'Floor'=>isset($response->cf->cf_floor) ? $response->cf->cf_floor : "<Blank>",
+                'Room_Name'=>isset($response->cf->cf_room_name) ? $response->cf->cf_room_name : " <Blank>",
+                'Site_Location'=>isset($response->cf->cf_location_1) ? $response->cf->cf_location_1 : "<Blank>",
+                /* CONTACT NAME */
+                'Contact_Name'=>[
+                    'first_name'=>$response->contact->firstName,
+                    'last_name'=>$response->contact->lastName,
+                ],
+                'Phone_Number'=>isset($response->contact->mobile) ? $response->contact->mobile : "0",
+                'Email'=>$response->contact->email,
+                'Purpose'=>isset($response->cf->cf_contract_type) ? $response->cf->cf_contract_type : "<Blank>",
+                'SOR'=>isset($response->cf->cf_swo_no) ? $response->cf->cf_swo_no : "<Blank>",
+                /* ENGINEER */
+                'Engineer'=>[[
+                    'Name'=>[
+                        'first_name'=>$response->assignee->firstName,
+                        'last_name'=>$response->assignee->lastName
+                    ],
+                    'Division'=>'<Blank>',
+                    'Department'=>'<Blank>',
+                ]],
+                /* Time */
+                'Start_Time'=>'01-01-1970 00:00',
+                'End_Time'=>'01-01-1970 00:00',
+                /* EQUIPMENT DETAILS */
+                'Equipment_Details'=>[[
+                    'Brand'=>(isset($response->product->productName)) ? $response->product->productName : "<Blank>",
+                    'PN'=>(isset($response->cf->cf_service_coverage)) ? $response->cf->cf_part_dongle_system_id : "<Blank>",
+                    'SN'=>(isset($response->cf->cf_serial_number)) ? $response->cf->cf_serial_number : "N/A",
+                    'SC'=>(isset($response->cf->cf_service_coverage)) ? $response->cf->cf_service_coverage : "N/A",
+                    'Remarks'=>"Working",
+                ]],
+                /* Description */
+                'Issue_Request'=>isset($response->cf->cf_purpose) ? $response->cf->cf_purpose : "<Blank>",
+                'Action_Taken'=>"<Blank>",
+                'Findings'=>"<Blank>",
+                'Root_Cause'=>"<Blank>",
+                'Recommendation'=>"<Blank>",
+                'Case_Status'=>'Work In Progress',
+                'Received_By'=>[
+                    'first_name'=>'<Blank>',
+                    'last_name'=>'<Blank>',
+                ],
+                'Date_Time'=>'01-01-1970 00:00'
+            ];
+            
+            $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Onsite_Activity", [
+                'verify'=>false,
+                'body'=>json_encode(array(
+                    'data'=>$data
+                ))
+            ]);
 
-        // dd($data);
-        $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Service_Report", [
-            'verify'=>false,
-            'body'=>json_encode(array(
-                'data'=>$data
-            ))
-        ]);
+            $response = json_decode($response->getBody(), 'JSON_PRETTY_PRINT');
 
-        $response = json_decode($response->getBody());
+            dd($response);
 
-        dd($response);
 
-        return $response;
+            return $response;
+        }else{
+            $this->validateapi();
+        }
     }
     public function render()
     {

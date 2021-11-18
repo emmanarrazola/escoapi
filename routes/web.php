@@ -43,6 +43,10 @@ Route::get('/listener', function (){
     return view('listener');
 });
 
+Route::get('/sharepoint', function (){
+    return view('sharepoint-listener');
+});
+
 
 Route::group(['middleware'=>'auth'], function(){
     Route::get('/dashboard', function () {
