@@ -30,20 +30,17 @@
                                 <span id="curr_activity">Connecting to Database </span><i class="fa fa-circle-notch fa-spin"></i>
                             </li>
                             <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Add <span id="add_task" class="float-right badge bg-blue">0</span>
+                                <i class="fa fa-circle-notch fa-spin"></i> New Tickets <span id="add" class="float-right badge bg-blue">0</span>
                             </li>
                             <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Edit <span id="edit_task" class="float-right badge bg-green">0</span>
+                                <i class="fa fa-circle-notch fa-spin"></i> New Attachments <span id="edit" class="float-right badge bg-green">0</span>
                             </li> 
                             <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Delete <span id="delete_task" class="float-right badge bg-warning">0</span>
-                            </li> 
-                            <li class="list-group-item">
-                                <i class="fa fa-circle-notch fa-spin"></i> Converted <span id="converted_task" class="float-right badge bg-info">0</span>
-                            </li> 
+                                <i class="fa fa-circle-notch fa-spin"></i> Deleted Record <span id="delete" class="float-right badge bg-warning">0</span>
+                            </li>
                             <li class="list-group-item">Warnings <span class="badge float-right bg-red" id="warning">0</span></li> 
                         </ul>
-                        @livewire('listener-queue')
+                        @livewire('sharepoint-listener')
                     </div>
                 </div>
             </div>
@@ -70,22 +67,22 @@
         document.addEventListener('livewire:load', function () {
             $(function(){
                 var t;
-                Livewire.emit('payload_listener');
+                Livewire.emit('sharepoint_listener');
 
                 window.addEventListener('update_task_count', event=>{
-                    $("#add_task").text(event.detail.add);
-                    $("#edit_task").text(event.detail.edit);
-                    $("#delete_task").text(event.detail.delete);
-                    $("#converted_task").text(event.detail.converted);
+                    $("#add").text(event.detail.add_tickets);
+                    $("#edit").text(event.detail.add_attach);
+                    $("#delete").text(event.detail.delete);
                     $("#curr_activity").text(event.detail.msg);
 
+                    console.log(event.detail);
 
                     if(event.detail.reload == 0){
                         console.log(event.detail.loop);
                     	if(event.detail.loop < 50){
                     		clearTimeout(t);
                     		t = window.setTimeout(function(){
-                    		    Livewire.emit('payload_listener');
+                    		    Livewire.emit('sharepoint_listener');
                     		}, event.detail.timeout);
                     	}else{
                     		location.reload(true);

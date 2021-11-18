@@ -252,8 +252,8 @@ class Main {
     public static function refresh_token($zoho_auth){
         $systemsetup = SystemSetupModel::firstOrFail();
         $apiauth = ZohoAuthModel::where('id', $zoho_auth)->first();
-        $diff = Carbon::parse($apiauth->expires_in)->diffInSeconds(now());
-
+        $diff = now()->diffInSeconds(Carbon::parse($apiauth->expires_in), false);
+        
         if($diff > 0 && $diff <= 300){
             
             $apis = ZohoApiModel::from('zoho_api as a')->where('a.zoho_auth_id', $zoho_auth)
@@ -310,12 +310,8 @@ class Main {
             }
 
         }elseif($diff <= 0){
-            $validate_token = Main::apiauthenticate(1001);;
-            if($validate_token === false){
-                $query = Main::apiauthenticate(1001);
-                return redirect($query);
-            }
-            return true;
+            $query = Main::apiauthenticate(1001);
+            return redirect($query);
         }else{
             return true;
         }
