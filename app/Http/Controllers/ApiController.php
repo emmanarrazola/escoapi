@@ -238,6 +238,52 @@ class ApiController extends Controller
             }
         }
     }
+    /* ATTACHMENTS */
+    public function desk_add_attachment(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1010
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function desk_edit_attachment(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1011
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
+    public function desk_delete_attachment(Request $request){
+        if($request->all() !== NULL){
+            $count = count($request->all());
+            $payload = json_encode($request->all());
+            
+            if(PayloadModel::create([
+                'payload'=>$payload,
+                'payload_type_id'=>1012
+            ])){
+                return response()->json(['msg'=>'ok']);
+            }else{
+                return response()->json(['msg'=>'error']);   
+            }
+        }
+    }
     public function zoho_form_webhooks(){
         $payload = PayloadModel::where('isconverted',0)->first();
 

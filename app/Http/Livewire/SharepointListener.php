@@ -98,8 +98,10 @@ class SharepointListener extends Component
         $result = collect(DB::select($sql));
         
         if($result->count() > 0){
+            $this->timeout = 500;
             $api = SharepointApi::where('id', 1002)->first();
             $api_add = SharepointApi::where('id', 1003)->first();
+            $api_update = SharepointApi::where('id', 1004)->first();
             $body_format = json_decode($api_add->body);
             $header = json_decode($api->header);
             $header->Authorization = str_replace("@accesscode", $sharepoint->access_token, $header->Authorization);
@@ -142,8 +144,11 @@ class SharepointListener extends Component
                                 $this->message = "Ticket ".$row->ticketNumber." successully created!";
                             }
                         }else{
-                            ZohodeskTicketModel::where('id',$row->id)->update(['isupload'=>1]);
-                            $this->message = "Ticket ".$row->ticketNumber." already existed!";
+                            if(isset($response->d->results[0]->Id)){
+                                // dd($url."/getbyid('".$response->d->results[0]->Id."')");
+                                ZohodeskTicketModel::where('id',$row->id)->update(['isupload'=>1]);
+                                $this->message = "Ticket ".$row->ticketNumber." already existed!";
+                            }
                         }
                     }
 
