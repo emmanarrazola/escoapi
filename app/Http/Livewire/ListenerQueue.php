@@ -61,7 +61,7 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1002]);
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1001, 1002]);
         
         $count = $payloads->count();
         if($count > 0){
@@ -74,7 +74,7 @@ class ListenerQueue extends Component
                 $due_date = Carbon::parse($zohopayload->dueDate)->format('Y-m-d H:i:s');
                 $required_date = (isset($zohopayload->cf->cf_required_date)) ? Carbon::parse($zohopayload->cf->cf_required_date)->format('Y-m-d H:i:s') : null;
                 $closed_date = (isset($zohopayload->closedTime)) ? Carbon::parse($zohopayload->closedTime)->format('Y-m-d H:i:s') : null;
-                // dd($zohopayload);
+                
                 $data = [
                     'ticketNumber'=>$zohopayload->ticketNumber,
                     'subject'=>$zohopayload->subject,
@@ -100,9 +100,11 @@ class ListenerQueue extends Component
                     // 'ticketOwner'=>$zohopayload->assignee->firstName." ".$zohopayload->assignee->lastName,
                 ];
 
-                // dd($data);
-                $ticket = ZohoDeskTicketModel::updateOrCreate(['id'=>$zohopayload->id], $data);
-                
+                try{
+                    $ticket = ZohoDeskTicketModel::updateOrCreate(['id'=>$zohopayload->id], $data);
+                }catch(\Exception $e){
+                    dd($e); //$data['subject']);
+                }
                 if($ticket){
                     
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
