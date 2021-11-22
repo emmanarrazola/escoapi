@@ -476,6 +476,7 @@ class Main {
         $apiauth = ZohoAuthModel::where('id', $apis->zoho_auth_id)->first()->toArray();
 
         $query_params = 0;
+        
         if($params->count() > 0){
             foreach($params as $param){
                 if($param->params_type_id == 1004){
@@ -507,6 +508,8 @@ class Main {
                 }
             }
         }
+
+        
 
         if($apiauth !== null){
             foreach($apiauth as $setup => $key){

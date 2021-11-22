@@ -64,40 +64,40 @@
 
 <script src="{{asset('plugins/jquery/jquery.min.js')}}"></script>
 <script type="text/javascript">
-        document.addEventListener('livewire:load', function () {
-            $(function(){
-                var t;
-                Livewire.emit('sharepoint_listener');
+    document.addEventListener('livewire:load', function () {
+        $(function(){
+            var t;
+            Livewire.emit('sharepoint_listener');
 
-                window.addEventListener('update_task_count', event=>{
-                    $("#add").text(event.detail.add_tickets);
-                    $("#edit").text(event.detail.add_attach);
-                    $("#delete").text(event.detail.delete);
-                    $("#curr_activity").text(event.detail.msg);
+            window.addEventListener('update_task_count', event=>{
+                $("#add").text(event.detail.add_tickets);
+                $("#edit").text(event.detail.add_attach);
+                $("#delete").text(event.detail.delete);
+                $("#curr_activity").text(event.detail.msg);
 
-                    console.log(event.detail);
+                console.log(event.detail);
 
-                    if(event.detail.reload == 0){
-                        console.log(event.detail.loop);
-                    	if(event.detail.loop < 50){
-                    		clearTimeout(t);
-                    		t = window.setTimeout(function(){
-                    		    Livewire.emit('sharepoint_listener');
-                    		}, event.detail.timeout);
-                    	}else{
-                    		location.reload(true);
-                    	}
+                if(event.detail.reload == 0){
+                    console.log(event.detail.loop);
+                    if(event.detail.loop < 50){
+                        clearTimeout(t);
+                        t = window.setTimeout(function(){
+                            Livewire.emit('sharepoint_listener');
+                        }, event.detail.timeout);
                     }else{
                         location.reload(true);
                     }
-                });
-            });
-
-            window.livewire.onError(statusCode => {
-                if (statusCode === 500) {
+                }else{
                     location.reload(true);
                 }
-                return false;
             });
         });
+
+        window.livewire.onError(statusCode => {
+            if (statusCode === 500) {
+                //location.reload(true);
+            }
+            return false;
+        });
+    });
 </script>

@@ -61,9 +61,10 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1001, 1002]);
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1002]);
         
         $count = $payloads->count();
+        
         if($count > 0){
             $this->timeout = 500;
             $data = $payloads->first();
@@ -102,27 +103,28 @@ class ListenerQueue extends Component
 
                 try{
                     $ticket = ZohoDeskTicketModel::updateOrCreate(['id'=>$zohopayload->id], $data);
+                    if($ticket){
+                    
+                        $payload_id = $payloads->first()->payload_type_id;
+                        PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
+                        if($payload_id == 1003){
+                            $this->message = "Added Ticket Number: ".$zohopayload->ticketNumber;
+                        }else{
+                            $this->message = "Update Ticket Number: ".$zohopayload->ticketNumber;
+                        }
+                    }else{
+                        PayloadModel::where('id', $payload_id)->update(['isfailed'=>1]);
+                        $this->reload = 1;
+                    }
                 }catch(\Exception $e){
                     dd($e); //$data['subject']);
                 }
-                if($ticket){
-                    
-                    PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
-                    
-                    if($payloads->first()->payload_type_id == 1003){
-                        $this->message = "Added Ticket Number: ".$zohopayload->ticketNumber;
-                    }else{
-                        $this->message = "Update Ticket Number: ".$zohopayload->ticketNumber;
-                    }
-                }else{
-                    PayloadModel::where('id', $payloads->first()->id)->update(['isfailed'=>1]);
-                    $this->reload = 1;
-                }
+               
             }elseif($data->payload_type_id == 1001){
                 
                 $retval = $this->create_service_report($zohopayload);
-                if($retval->code == '3000'){
-                    
+                
+                if($retval['code'] == '3000'){
                     // dd($zohopayload);
                     $this->message = "Add Service Report";
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
@@ -147,7 +149,8 @@ class ListenerQueue extends Component
         $this->get_task_count();    
     }
     public function create_service_report($data){
-        $build = Main::buildapiurl(1012, ['include'=>'contacts,assignee,departments,products'], ['351081000048847001']);
+        
+        $build = Main::buildapiurl(1012, ['include'=>'contacts,assignee,departments,products'], [$data->ticketId]);
         
         // dd($build);
         // dd($data);
@@ -167,9 +170,25 @@ class ListenerQueue extends Component
         if($statuscode !== 401){
             
             $response = json_decode($response->getBody());
+            
+            if(isset($response->productId)){
+                $build_product = Main::buildapiurl(1013, null, [$response->productId]);
+                $product = $apicon->request('get', $build_product['query'], [
+                    'verify'=>false,
+                ]);
+
+                $product_details = json_decode($product->getBody());
+                $eqp['part'] = $product_details->cf->cf_part_number;
+                $eqp['sn'] = $product_details->cf->cf_serial_number;
+                $eqp['sc'] = $product_details->cf->cf_status_1;
+                $eqp['remarks'] = $product_details->cf->cf_remarks;
+            }
 
             
+            
             $data = [
+                /* External */
+                'External'=>true,
                 /* Ticket Number */
                 'Ticket_Number'=>$response->ticketNumber,
                 'Services_AM_Email'=>'default@gmail.com',
@@ -202,13 +221,13 @@ class ListenerQueue extends Component
                 /* EQUIPMENT DETAILS */
                 'Equipment_Details'=>[[
                     'Brand'=>(isset($response->product->productName)) ? $response->product->productName : "<Blank>",
-                    'PN'=>(isset($response->cf->cf_service_coverage)) ? $response->cf->cf_part_dongle_system_id : "<Blank>",
-                    'SN'=>(isset($response->cf->cf_serial_number)) ? $response->cf->cf_serial_number : "N/A",
-                    'SC'=>(isset($response->cf->cf_service_coverage)) ? $response->cf->cf_service_coverage : "N/A",
-                    'Remarks'=>"Working",
+                    'PN'=>(isset($eqp['part'])) ? $eqp['part'] : "<Blank>",
+                    'SN'=>(isset($eqp['sn'])) ? $eqp['sn'] : "N/A",
+                    'SC'=>(isset($eqp['sc'])) ? $eqp['sc'] : "N/A",
+                    'Remarks'=>(isset($eqp['remarks'])) ? $eqp['remarks'] : "N/A",
                 ]],
                 /* Description */
-                'Issue_Request'=>isset($response->cf->cf_purpose) ? $response->cf->cf_purpose : "<Blank>",
+                'Issue_Request'=>isset($response->subject) ? $response->subject : "<Blank>",
                 'Action_Taken'=>"<Blank>",
                 'Findings'=>"<Blank>",
                 'Root_Cause'=>"<Blank>",
@@ -220,7 +239,8 @@ class ListenerQueue extends Component
                 ],
                 'Date_Time'=>'01-01-1970 00:00'
             ];
-            
+
+           
             $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Onsite_Activity", [
                 'verify'=>false,
                 'body'=>json_encode(array(
@@ -229,10 +249,6 @@ class ListenerQueue extends Component
             ]);
 
             $response = json_decode($response->getBody(), 'JSON_PRETTY_PRINT');
-
-            dd($response);
-
-
             return $response;
         }else{
             $this->validateapi();
