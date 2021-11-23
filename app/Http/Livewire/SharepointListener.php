@@ -109,7 +109,9 @@ class SharepointListener extends Component
             'verify'=>false
         ]);
         
+        
     
+        
         if($response->getStatusCode() === 401){
             $this->get_token();
             $this->sharepoint_listener();
@@ -128,6 +130,7 @@ class SharepointListener extends Component
                     ]);
                     
                     $response = json_decode($response->getBody());
+                    
                     if(isset($response->d)){
                         ZohodeskTicketModel::where('id',$row->id)->update(['isupload'=>1]);
                         $this->message = "Ticket ".$row->ticketNumber." successully created!";
@@ -333,7 +336,9 @@ class SharepointListener extends Component
             'form_params'=>(array) $body
         ]);
 
+        
         $response = json_decode($response->getBody());
+        dd($response);
         if(isset($response->access_token)){
             $auth->update(['access_token'=>$response->access_token]);
             return true;
