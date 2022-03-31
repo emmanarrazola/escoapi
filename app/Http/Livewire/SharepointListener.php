@@ -221,42 +221,47 @@ class SharepointListener extends Component
 
                 // dd($response->getBody()->getContents());
                 if($response->getStatusCode() !== 401 && $response->getBody()->getContents() !== null){
-                    $desk = json_decode($response->getBody());
-                    $auth = SharepointAuth::first();
-                    $api = SharepointApi::where('id', 1002)->first();
-                    $body_format = json_decode($api->body);
-                    $header = json_decode($api->header);
-                    
-                    try{
-                    $header->Authorization = str_replace("@accesscode", $auth->access_token, $header->Authorization);
-                    $url = str_replace("@foldername", $auth->ticket_folder, $api->url);
-                    $ticket_url = $url."?\$filter=TicketNumber eq ".$result->first()->ticketNumber."&\$expand=AttachmentFiles";
-                    $apisharepoint = new \GuzzleHttp\Client([
-                        'headers'=>(array) $header,
-                        'http_errors'=>false,
-                    ]);
-                    
-                    $response = $apisharepoint->request('get', $ticket_url, [
-                        'verify'=>false
-                    ]);
-                    }catch(\Exception $e){
-                        dd($e);
-                    }
+                    if($result->count() <> 0){
+                        $desk = json_decode($response->getBody());
+                        $auth = SharepointAuth::first();
+                        $api = SharepointApi::where('id', 1002)->first();
+                        $body_format = json_decode($api->body);
+                        $header = json_decode($api->header);
+                        
+                        try{
+                        $header->Authorization = str_replace("@accesscode", $auth->access_token, $header->Authorization);
+                        $url = str_replace("@foldername", $auth->ticket_folder, $api->url);
+                        
+                        $ticket_url = $url."?\$filter=TicketNumber eq ".$result->first()->ticketNumber."&\$expand=AttachmentFiles";
+                        $apisharepoint = new \GuzzleHttp\Client([
+                            'headers'=>(array) $header,
+                            'http_errors'=>false,
+                        ]);
+                        
+                        $response = $apisharepoint->request('get', $ticket_url, [
+                            'verify'=>false
+                        ]);
+                        }catch(\Exception $e){
+                            dd($e);
+                        }
 
-                    
-                    if($response->getStatusCode() !== 403 && $response->getStatusCode() !== 401){
-                        $response = json_decode($response->getBody());
-                        if(isset($response->d->results) && count($response->d->results) <> 0){
-                            if(isset($desk)){
-                                $this->sharepoint_upload($attachment, $header, $apicon, $auth, $payload_id, $response->d->results);
+                        
+                        if($response->getStatusCode() !== 403 && $response->getStatusCode() !== 401){
+                            $response = json_decode($response->getBody());
+                            if(isset($response->d->results) && count($response->d->results) <> 0){
+                                if(isset($desk)){
+                                    $this->sharepoint_upload($attachment, $header, $apicon, $auth, $payload_id, $response->d->results);
+                                }
+                            }else{
+                                /* INSERT LIST FIRST */
+                                $this->create_list($result);
                             }
                         }else{
-                            /* INSERT LIST FIRST */
-                            $this->create_list($result);
+                            $this->get_token();
+                            $this->sharepoint_listener();
                         }
                     }else{
-                        $this->get_token();
-                        $this->sharepoint_listener();
+                        PayloadModel::where('id', $payload_id)->update(['isfailed'=>1]); 
                     }
                 }
             }else{
@@ -338,7 +343,7 @@ class SharepointListener extends Component
 
         
         $response = json_decode($response->getBody());
-        dd($response);
+        //dd($response);
         if(isset($response->access_token)){
             $auth->update(['access_token'=>$response->access_token]);
             return true;

@@ -61,13 +61,13 @@ class ListenerQueue extends Component
         $this->dispatchBrowserEvent('update_task_count', $data);
     }
     public function payload_listener(){
-        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1002]);
+        $payloads = PayloadModel::where('isconverted', 0)->where('isfailed', 0)->whereNotIn('payload_type_id', [1002, 1005, 1006]);
         
         $count = $payloads->count();
-        
         if($count > 0){
             $this->timeout = 500;
             $data = $payloads->first();
+            // dd($data->payload_type_id);
             $zohopayload = json_decode($data->payload)[0]->payload;
             if($data->payload_type_id == 1003 || $data->payload_type_id == 1004){
                 
@@ -130,7 +130,8 @@ class ListenerQueue extends Component
                     PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }else{
                     $this->message = "Error Converting Ticket";
-                    //PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
+                    
+                    PayloadModel::where('id', $payloads->first()->id)->update(['isconverted'=>1]);
                 }
             }elseif($data->payload_type_id == 1008){
                 
@@ -155,7 +156,7 @@ class ListenerQueue extends Component
         // dd($build);
         // dd($data);
         // dd($build['headers']);
-
+        
         $apicon = new \GuzzleHttp\Client([
             'headers'=>$build['headers'],
             'http_errors' => false,
@@ -166,12 +167,16 @@ class ListenerQueue extends Component
         ]);
 
         
+        // dd($build['query']);
         $statuscode = $response->getStatusCode();
+        // dd($statuscode);
+
         if($statuscode !== 401){
             
             $response = json_decode($response->getBody());
             
-            if(isset($response->productId)){
+            
+            if(isset($response->productId) && $response->productId !== null){
                 $build_product = Main::buildapiurl(1013, null, [$response->productId]);
                 $product = $apicon->request('get', $build_product['query'], [
                     'verify'=>false,
@@ -183,8 +188,8 @@ class ListenerQueue extends Component
                 $eqp['sc'] = $product_details->cf->cf_status_1;
                 $eqp['remarks'] = $product_details->cf->cf_remarks;
             }
-
-            
+            // dd($response->assignee->email);
+            // dd($response);
             
             $data = [
                 /* External */
@@ -237,9 +242,12 @@ class ListenerQueue extends Component
                     'first_name'=>'<Blank>',
                     'last_name'=>'<Blank>',
                 ],
-                'Date_Time'=>'01-01-1970 00:00'
+                'Date_Time'=>'01-01-1970 00:00',
+                'users'=>isset($response->assignee->email) ? $response->assignee->email : "default@gmail.com",
+                'Region'=>$response->cf->cf_region
             ];
 
+            // dd($data);
            
             $response = $apicon->post("https://creator.zoho.com/api/v2/ezabelita_fe_silvano/service-report/form/Onsite_Activity", [
                 'verify'=>false,
@@ -249,6 +257,7 @@ class ListenerQueue extends Component
             ]);
 
             $response = json_decode($response->getBody(), 'JSON_PRETTY_PRINT');
+
             return $response;
         }else{
             $this->validateapi();

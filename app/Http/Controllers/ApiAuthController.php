@@ -38,10 +38,14 @@ class ApiAuthController extends Controller
                 ZohoAuthModel::where('id', $zoho_auth_id)->update(['code'=>$code]);
             }
 
-            if(Auth::user() !== null){
-                return redirect(Session::get('apiredirect'));
-            }else{
+            if (strpos(Session::get('apiredirect'), 'livewire') !== false) {
                 return redirect(url('/listener'));
+            }else{
+                if(Auth::user() !== null){
+                    return redirect(Session::get('apiredirect'));
+                }else{
+                    return redirect(url('/listener'));
+                }
             }
         }else{
             abort(404);
